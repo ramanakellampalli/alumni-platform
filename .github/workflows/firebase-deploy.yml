@@ -1,0 +1,32 @@
+name: Firebase CI/CD
+
+on:
+  push:
+    branches:
+      - main  # or whatever branch you want to deploy from
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20 # or your project Node version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build  # make sure your package.json has build script
+
+      - name: Deploy to Firebase
+        uses: FirebaseExtended/action-hosting-deploy@v1
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseToken: ${{ secrets.FIREBASE_TOKEN }}
+          channelId: live  # "live" deploys to production, can also deploy to preview

@@ -5,6 +5,7 @@ import { db } from '../config/firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { LogOut, Calendar, IndianRupee, FileText, User, Video, Menu, X } from 'lucide-react';
 import Footer from '../components/Footer';
+import Reports from '../components/Reports';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -240,15 +241,6 @@ export default function Dashboard() {
 
           <div className="card">
             <div className="flex items-center gap-3 mb-2">
-              <Calendar size={20} className="text-purple-600" />
-              <h3 className="font-semibold text-gray-700">Total Meetings</h3>
-            </div>
-            <p className="text-3xl font-bold text-purple-600">{meetings.length}</p>
-            <p className="text-sm text-gray-500 mt-1">Events scheduled</p>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center gap-3 mb-2">
               <IndianRupee size={20} className="text-green-600" />
               <h3 className="font-semibold text-gray-700">Total Donations</h3>
             </div>
@@ -267,6 +259,17 @@ export default function Dashboard() {
               ₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
             <p className="text-sm text-gray-500 mt-1">{expenses.length} transactions</p>
+          </div>
+
+          <div className="card">
+            <div className="flex items-center gap-3 mb-2">
+              <IndianRupee size={20} className="text-teal-600" />
+              <h3 className="font-semibold text-gray-700">Remaining Cash</h3>
+            </div>
+            <p className={`text-3xl font-bold ${totalDonations - totalExpenses >= 0 ? 'text-teal-600' : 'text-red-600'}`}>
+              ₹{(totalDonations - totalExpenses).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <p className="text-sm text-gray-500 mt-1">Available balance</p>
           </div>
         </div>
 
@@ -501,15 +504,7 @@ export default function Dashboard() {
 
             {/* Reports Tab */}
             {activeTab === 'reports' && (
-              <div className="text-center py-16">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4">
-                  <FileText size={40} className="text-gray-400" />
-                </div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2">Reports Coming Soon</h3>
-                <p className="text-gray-600 max-w-md mx-auto">
-                  We're working on detailed analytics and reports. This feature will be available soon with insights on donations, expenses, and member activity.
-                </p>
-              </div>
+              <Reports donations={donations} expenses={expenses} />
             )}
           </div>
         </div>

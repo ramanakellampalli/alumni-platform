@@ -4,6 +4,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../config/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { LogIn, ArrowLeft, Shield, Eye, EyeOff } from 'lucide-react';
+import Footer from '../components/Footer';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -79,8 +80,9 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-red-100 px-4">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-100 flex flex-col">
+      <div className="flex-grow flex items-center justify-center px-4">
+        <div className="max-w-md w-full">
         <button
           onClick={() => navigate('/')}
           className="flex items-center gap-2 text-gray-700 hover:text-gray-900 mb-6"
@@ -165,6 +167,9 @@ export default function AdminLogin() {
           </div>
         </div>
       </div>
+      </div>
+
+      <Footer />
     </div>
   );
 }

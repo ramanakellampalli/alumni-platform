@@ -4,6 +4,7 @@ import { db } from '../config/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import Toast from '../components/Toast';
+import Footer from '../components/Footer';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex flex-col">
       {/* Toast Notification */}
       {toast && (
         <Toast
@@ -64,7 +65,8 @@ export default function Register() {
         />
       )}
 
-      <div className="max-w-2xl mx-auto">
+      <div className="flex-grow py-8 px-4">
+        <div className="max-w-2xl mx-auto">
         <button
           onClick={() => navigate('/')}
           className="flex items-center gap-2 text-primary-700 hover:text-primary-800 mb-6"
@@ -196,6 +198,9 @@ export default function Register() {
           </form>
         </div>
       </div>
+      </div>
+
+      <Footer />
     </div>
   );
 }

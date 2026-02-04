@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { LogIn, UserPlus } from 'lucide-react';
+import Footer from '../components/Footer';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -44,8 +45,9 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 px-4">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex flex-col">
+      <div className="flex-grow flex items-center justify-center px-4">
+        <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-primary-900 mb-2">Alumni Platform</h1>
           <p className="text-gray-600">Welcome back! Please login to continue.</p>
@@ -120,6 +122,9 @@ export default function Login() {
           </div>
         </div>
       </div>
+      </div>
+
+      <Footer />
     </div>
   );
 }

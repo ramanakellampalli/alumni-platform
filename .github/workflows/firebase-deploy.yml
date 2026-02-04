@@ -28,5 +28,6 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseToken: ${{ secrets.FIREBASE_TOKEN }}
+          firebaseToken: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           channelId: live  # "live" deploys to production, can also deploy to preview
+          entryPoint: .

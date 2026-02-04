@@ -5,7 +5,7 @@ import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc } f
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { LogOut, Plus, Calendar, IndianRupee, FileText, Users, Trash2, User, Shield, UserPlus, Menu, X, Eye, EyeOff } from 'lucide-react';
 import Toast from '../components/Toast';
-import ConfirmModal from '../components/ConfirmModal';
+import ConfirmModal from '../components/Confirmmodal';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();

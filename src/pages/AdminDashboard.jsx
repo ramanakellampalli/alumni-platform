@@ -7,6 +7,7 @@ import { LogOut, Plus, Calendar, IndianRupee, FileText, Users, Trash2, User, Shi
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
 import Footer from '../components/Footer';
+import Reports from '../components/Reports';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -354,7 +355,7 @@ export default function AdminDashboard() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <div className="card">
             <div className="flex items-center gap-2 mb-2">
               <Users size={20} className="text-primary-600" />
@@ -385,6 +386,16 @@ export default function AdminDashboard() {
               <h3 className="font-semibold text-gray-700">Expenses</h3>
             </div>
             <p className="text-3xl font-bold text-orange-600">₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+          </div>
+
+          <div className="card">
+            <div className="flex items-center gap-2 mb-2">
+              <IndianRupee size={20} className="text-teal-600" />
+              <h3 className="font-semibold text-gray-700">Remaining Cash</h3>
+            </div>
+            <p className={`text-3xl font-bold ${totalDonations - totalExpenses >= 0 ? 'text-teal-600' : 'text-red-600'}`}>
+              ₹{(totalDonations - totalExpenses).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
           </div>
         </div>
 
@@ -845,15 +856,7 @@ export default function AdminDashboard() {
 
             {/* Reports Tab */}
             {activeTab === 'reports' && (
-              <div className="text-center py-16">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4">
-                  <FileText size={40} className="text-gray-400" />
-                </div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2">Reports Coming Soon</h3>
-                <p className="text-gray-600 max-w-md mx-auto">
-                  Advanced analytics and reporting features are under development. Soon you'll be able to generate detailed reports on donations, expenses, user activity, and more.
-                </p>
-              </div>
+              <Reports donations={donations} expenses={expenses} />
             )}
           </div>
         </div>

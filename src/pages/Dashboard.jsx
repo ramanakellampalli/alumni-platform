@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { db } from '../config/firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { LogOut, Calendar, IndianRupee, FileText, User, Video, Menu, X } from 'lucide-react';
+import Footer from '../components/Footer';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -513,6 +514,8 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }

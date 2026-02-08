@@ -1,0 +1,5 @@
+# CODEOWNERS
+# Put this file at .github/CODEOWNERS (preferred) or at the repo root.
+# Last matching rule wins.
+# Default owner for everything
+* @ramanakellampalli

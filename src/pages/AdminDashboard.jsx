@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth, db } from '../config/firebase';
+import { auth, db, sendAdminWelcomeEmail } from '../config/firebase';
 import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { LogOut, Plus, Calendar, IndianRupee, FileText, Users, Trash2, User, Shield, UserPlus, Menu, X, Eye, EyeOff } from 'lucide-react';
@@ -196,7 +196,26 @@ export default function AdminDashboard() {
         createdBy: currentAdmin.uid
       });
 
-      showToast('Admin added successfully!');
+      // Send welcome email to new admin (only if email feature is enabled)
+      const isEmailEnabled = import.meta.env.VITE_EMAIL_ENABLED === 'true';
+
+      if (isEmailEnabled) {
+        try {
+          await sendAdminWelcomeEmail({
+            name: adminForm.name,
+            email: adminForm.email,
+            isSuperAdmin: false,
+            tempPassword: adminForm.password
+          });
+          showToast('Admin added successfully! Welcome email sent.');
+        } catch (emailError) {
+          console.error('Failed to send welcome email:', emailError);
+          showToast('Admin added successfully! (Email notification failed)');
+        }
+      } else {
+        showToast('Admin added successfully!');
+      }
+
       setAdminForm({ email: '', password: '', name: '' });
       fetchData();
     } catch (error) {

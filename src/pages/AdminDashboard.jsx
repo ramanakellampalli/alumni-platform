@@ -809,31 +809,31 @@ export default function AdminDashboard() {
 
                 {/* Admins List */}
                 <h3 className="text-lg font-semibold mb-4">All Administrators ({admins.length})</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
+                <div className="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
+                  <table className="w-full min-w-[600px]">
                     <thead className="border-b border-gray-200">
                       <tr className="text-left">
-                        <th className="pb-3">Name</th>
-                        <th className="pb-3">Email</th>
-                        <th className="pb-3">Role</th>
-                        <th className="pb-3">Actions</th>
+                        <th className="pb-3 text-xs sm:text-sm">Name</th>
+                        <th className="pb-3 text-xs sm:text-sm">Email</th>
+                        <th className="pb-3 text-xs sm:text-sm">Role</th>
+                        <th className="pb-3 text-xs sm:text-sm">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {admins.map((admin) => (
                         <tr key={admin.id} className="border-b border-gray-100">
-                          <td className="py-3">{admin.name || '-'}</td>
-                          <td className="py-3">{admin.email}</td>
-                          <td className="py-3">
+                          <td className="py-3 text-xs sm:text-sm">{admin.name || '-'}</td>
+                          <td className="py-3 text-xs sm:text-sm">{admin.email}</td>
+                          <td className="py-3 text-xs sm:text-sm">
                             <span className={`px-2 py-1 rounded text-xs font-medium ${
-                              admin.isSuperAdmin 
-                                ? 'bg-orange-100 text-orange-700' 
+                              admin.isSuperAdmin
+                                ? 'bg-orange-100 text-orange-700'
                                 : 'bg-blue-100 text-blue-700'
                             }`}>
                               {admin.isSuperAdmin ? 'Super Admin' : 'Admin'}
                             </span>
                           </td>
-                          <td className="py-3">
+                          <td className="py-3 text-xs sm:text-sm">
                             {!admin.isSuperAdmin && (
                               <button
                                 onClick={() => handleRemoveAdmin(admin.id)}

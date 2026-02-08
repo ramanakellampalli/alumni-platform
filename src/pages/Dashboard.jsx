@@ -400,24 +400,24 @@ export default function Dashboard() {
               {/* Pagination Controls */}
               {totalDonationPages > 1 && (
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-600">
-                    Showing {((donationPage - 1) * itemsPerPage) + 1} to {Math.min(donationPage * itemsPerPage, donations.length)} of {donations.length} donations
+                  <p className="text-xs sm:text-sm text-gray-500">
+                    {((donationPage - 1) * itemsPerPage) + 1}–{Math.min(donationPage * itemsPerPage, donations.length)} of {donations.length}
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() => setDonationPage(p => Math.max(1, p - 1))}
                       disabled={donationPage === 1}
-                      className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      className="px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
-                      Previous
+                      Prev
                     </button>
-                    <span className="px-3 py-1 text-sm">
-                      Page {donationPage} of {totalDonationPages}
+                    <span className="px-2 py-1.5 text-xs sm:text-sm font-medium text-gray-900">
+                      {donationPage} / {totalDonationPages}
                     </span>
                     <button
                       onClick={() => setDonationPage(p => Math.min(totalDonationPages, p + 1))}
                       disabled={donationPage === totalDonationPages}
-                      className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      className="px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
                       Next
                     </button>
@@ -473,24 +473,24 @@ export default function Dashboard() {
               {/* Pagination Controls */}
               {totalExpensePages > 1 && (
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-600">
-                    Showing {((expensePage - 1) * itemsPerPage) + 1} to {Math.min(expensePage * itemsPerPage, expenses.length)} of {expenses.length} expenses
+                  <p className="text-xs sm:text-sm text-gray-500">
+                    {((expensePage - 1) * itemsPerPage) + 1}–{Math.min(expensePage * itemsPerPage, expenses.length)} of {expenses.length}
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() => setExpensePage(p => Math.max(1, p - 1))}
                       disabled={expensePage === 1}
-                      className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      className="px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
-                      Previous
+                      Prev
                     </button>
-                    <span className="px-3 py-1 text-sm">
-                      Page {expensePage} of {totalExpensePages}
+                    <span className="px-2 py-1.5 text-xs sm:text-sm font-medium text-gray-900">
+                      {expensePage} / {totalExpensePages}
                     </span>
                     <button
                       onClick={() => setExpensePage(p => Math.min(totalExpensePages, p + 1))}
                       disabled={expensePage === totalExpensePages}
-                      className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      className="px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
                       Next
                     </button>

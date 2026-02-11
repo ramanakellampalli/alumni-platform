@@ -3,7 +3,7 @@ name: Firebase CI/CD
 on:
   push:
     branches:
-      - main  # or whatever branch you want to deploy from
+      - main
 
 jobs:
   build-and-deploy:
@@ -16,18 +16,32 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20 # or your project Node version
+          node-version: 20
 
       - name: Install dependencies
         run: npm install
 
       - name: Build project
-        run: npm run build  # make sure your package.json has build script
+        run: npm run build
 
       - name: Deploy to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          channelId: live  # "live" deploys to production, can also deploy to preview
+          channelId: live
           entryPoint: .
+
+      # 👇 NEW: Create GitHub Release
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Release build-${{ github.run_number }}
+          body: |
+            🚀 Firebase deployment successful
+
+            - Commit: ${{ github.sha }}
+            - Branch: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

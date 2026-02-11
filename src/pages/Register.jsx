@@ -44,7 +44,7 @@ export default function Register() {
       
       // Delay navigation to show toast
       setTimeout(() => {
-        navigate('/');
+        navigate('/login');
       }, 2000);
     } catch (err) {
       console.error('Registration error:', err);
@@ -68,7 +68,7 @@ export default function Register() {
       <div className="flex-grow py-8 px-4">
         <div className="max-w-2xl mx-auto">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/login')}
           className="flex items-center gap-2 text-primary-700 hover:text-primary-800 mb-6"
         >
           <ArrowLeft size={20} />

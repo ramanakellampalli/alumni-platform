@@ -84,7 +84,7 @@ export default function AdminLogin() {
       <div className="flex-grow flex items-center justify-center px-4">
         <div className="max-w-md w-full">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/login')}
           className="flex items-center gap-2 text-gray-700 hover:text-gray-900 mb-6"
         >
           <ArrowLeft size={20} />
@@ -162,7 +162,7 @@ export default function AdminLogin() {
 
           <div className="mt-6 pt-6 border-t border-gray-200 text-center">
             <p className="text-sm text-gray-600">
-              Regular user? <button onClick={() => navigate('/')} className="text-primary-600 hover:underline">Login here</button>
+              Regular user? <button onClick={() => navigate('/login')} className="text-primary-600 hover:underline">Login here</button>
             </p>
           </div>
         </div>

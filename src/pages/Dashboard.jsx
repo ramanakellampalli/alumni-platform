@@ -25,7 +25,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!currentUser) {
-      navigate('/');
+      navigate('/login');
       return;
     }
     fetchData();
@@ -60,7 +60,7 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate('/login');
   };
 
   const totalDonations = donations.reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);

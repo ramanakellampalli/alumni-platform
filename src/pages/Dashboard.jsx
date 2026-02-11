@@ -213,8 +213,8 @@ export default function Dashboard() {
         {/* User Info Card */}
         <div className="card mb-8">
           <div className="flex items-center gap-3 mb-4">
-            <div className="bg-primary-100 p-3 rounded-full">
-              <User size={24} className="text-primary-700" />
+            <div className="w-12 h-12 rounded-full bg-primary-700 flex items-center justify-center text-white font-bold text-lg">
+              {(currentUser?.firstName?.[0] || '').toUpperCase()}{(currentUser?.lastName?.[0] || '').toUpperCase()}
             </div>
             <div>
               <h2 className="text-xl font-semibold">

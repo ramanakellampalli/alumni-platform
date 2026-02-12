@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 // TODO: Replace with your Firebase project configuration
 // You'll get these values from Firebase Console
@@ -20,5 +21,10 @@ const app = initializeApp(firebaseConfig);
 // Initialize services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const functions = getFunctions(app);
+
+// Cloud Functions callable references
+export const sendUserWelcomeEmail = httpsCallable(functions, 'sendUserWelcomeEmail');
+export const sendAdminWelcomeEmail = httpsCallable(functions, 'sendAdminWelcomeEmail');
 
 export default app;

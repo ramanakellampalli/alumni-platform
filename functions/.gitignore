@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Firebase
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# Local emulator data
+*.local

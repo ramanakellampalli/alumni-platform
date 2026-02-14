@@ -74,6 +74,9 @@ export default function AdminDashboard() {
   const [showCreateCommitteeForm, setShowCreateCommitteeForm] = useState(false);
   const [showAddMemberForm, setShowAddMemberForm] = useState(false);
   const [showAddAdminForm, setShowAddAdminForm] = useState(false);
+  const [showDonationForm, setShowDonationForm] = useState(false);
+  const [showExpenseForm, setShowExpenseForm] = useState(false);
+  const [showMeetingForm, setShowMeetingForm] = useState(false);
 
   useEffect(() => {
     // Check if admin is logged in via Firebase Auth
@@ -561,79 +564,96 @@ export default function AdminDashboard() {
             {/* Meetings Tab */}
             {activeTab === 'meetings' && (
               <div>
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <Plus size={20} />
-                  Add New Meeting
-                </h2>
-                <form onSubmit={handleAddMeeting} className="space-y-4 mb-8">
-                  <input
-                    type="text"
-                    placeholder="Meeting Title"
-                    value={meetingForm.title}
-                    onChange={(e) => setMeetingForm({...meetingForm, title: e.target.value})}
-                    className="input-field"
-                    required
-                  />
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input
-                      type="date"
-                      value={meetingForm.date}
-                      onChange={(e) => setMeetingForm({...meetingForm, date: e.target.value})}
-                      className="input-field"
-                      required
-                    />
-                    <input
-                      type="time"
-                      placeholder="From"
-                      value={meetingForm.timeFrom}
-                      onChange={(e) => setMeetingForm({...meetingForm, timeFrom: e.target.value})}
-                      className="input-field"
-                      required
-                    />
-                    <input
-                      type="time"
-                      placeholder="To"
-                      value={meetingForm.timeTo}
-                      onChange={(e) => setMeetingForm({...meetingForm, timeTo: e.target.value})}
-                      className="input-field"
-                      required
-                    />
-                  </div>
-                  <textarea
-                    placeholder="Description"
-                    value={meetingForm.description}
-                    onChange={(e) => setMeetingForm({...meetingForm, description: e.target.value})}
-                    className="input-field"
-                    rows="3"
-                    required
-                  />
+                {/* Add New Meeting Form (Collapsible) */}
+                <div className="bg-purple-50 border border-purple-200 rounded-lg mb-6 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setShowMeetingForm(!showMeetingForm)}
+                    className="w-full px-5 py-3 flex items-center justify-between hover:bg-purple-100 transition-colors"
+                  >
+                    <h2 className="text-lg font-semibold flex items-center gap-2">
+                      <Plus size={18} />
+                      Add New Meeting
+                    </h2>
+                    <span className="text-purple-700 font-medium">
+                      {showMeetingForm ? '▼' : '►'}
+                    </span>
+                  </button>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input
-                      type="url"
-                      placeholder="Meeting Link (Zoom, Google Meet, etc.)"
-                      value={meetingForm.zoomLink}
-                      onChange={(e) => setMeetingForm({...meetingForm, zoomLink: e.target.value})}
-                      className="input-field"
-                    />
+                  {showMeetingForm && (
+                    <div className="px-5 pb-5 pt-2">
+                      <form onSubmit={handleAddMeeting} className="space-y-4">
+                        <input
+                          type="text"
+                          placeholder="Meeting Title"
+                          value={meetingForm.title}
+                          onChange={(e) => setMeetingForm({...meetingForm, title: e.target.value})}
+                          className="input-field"
+                          required
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <input
+                            type="date"
+                            value={meetingForm.date}
+                            onChange={(e) => setMeetingForm({...meetingForm, date: e.target.value})}
+                            className="input-field"
+                            required
+                          />
+                          <input
+                            type="time"
+                            placeholder="From"
+                            value={meetingForm.timeFrom}
+                            onChange={(e) => setMeetingForm({...meetingForm, timeFrom: e.target.value})}
+                            className="input-field"
+                            required
+                          />
+                          <input
+                            type="time"
+                            placeholder="To"
+                            value={meetingForm.timeTo}
+                            onChange={(e) => setMeetingForm({...meetingForm, timeTo: e.target.value})}
+                            className="input-field"
+                            required
+                          />
+                        </div>
+                        <textarea
+                          placeholder="Description"
+                          value={meetingForm.description}
+                          onChange={(e) => setMeetingForm({...meetingForm, description: e.target.value})}
+                          className="input-field"
+                          rows="3"
+                          required
+                        />
 
-                    <select
-                      value={meetingForm.committeeIds[0] || ''}
-                      onChange={(e) => setMeetingForm({...meetingForm, committeeIds: e.target.value ? [e.target.value] : []})}
-                      className="input-field"
-                      required
-                    >
-                      <option value="">Select Committee</option>
-                      {committees.map((committee) => (
-                        <option key={committee.id} value={committee.id}>
-                          {committee.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <input
+                            type="url"
+                            placeholder="Meeting Link (Zoom, Google Meet, etc.)"
+                            value={meetingForm.zoomLink}
+                            onChange={(e) => setMeetingForm({...meetingForm, zoomLink: e.target.value})}
+                            className="input-field"
+                          />
 
-                  <button type="submit" className="btn-primary">Add Meeting</button>
-                </form>
+                          <select
+                            value={meetingForm.committeeIds[0] || ''}
+                            onChange={(e) => setMeetingForm({...meetingForm, committeeIds: e.target.value ? [e.target.value] : []})}
+                            className="input-field"
+                            required
+                          >
+                            <option value="">Select Committee</option>
+                            {committees.map((committee) => (
+                              <option key={committee.id} value={committee.id}>
+                                {committee.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <button type="submit" className="btn-primary">Add Meeting</button>
+                      </form>
+                    </div>
+                  )}
+                </div>
 
                 <h3 className="text-lg font-semibold mb-4">All Meetings</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -683,74 +703,91 @@ export default function AdminDashboard() {
             {/* Donations Tab */}
             {activeTab === 'donations' && (
               <div>
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <Plus size={20} />
-                  Record New Donation
-                </h2>
-                <form onSubmit={handleAddDonation} className="space-y-4 mb-8">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input
-                      type="date"
-                      value={donationForm.date}
-                      onChange={(e) => setDonationForm({...donationForm, date: e.target.value})}
-                      className="input-field"
-                      required
-                    />
-                    <input
-                      type="text"
-                      placeholder="Donor Name"
-                      value={donationForm.donorName}
-                      onChange={(e) => setDonationForm({...donationForm, donorName: e.target.value})}
-                      className="input-field"
-                      required
-                    />
-                    <input
-                      type="number"
-                      step="0.01"
-                      placeholder="Amount"
-                      value={donationForm.amount}
-                      onChange={(e) => setDonationForm({...donationForm, amount: e.target.value})}
-                      className="input-field"
-                      required
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input
-                      type="tel"
-                      placeholder="Phone Number"
-                      value={donationForm.phone}
-                      onChange={(e) => setDonationForm({...donationForm, phone: e.target.value})}
-                      className="input-field"
-                      required
-                    />
-                    <input
-                      type="number"
-                      placeholder="Passed Out Year"
-                      value={donationForm.alumniYear}
-                      onChange={(e) => setDonationForm({...donationForm, alumniYear: e.target.value})}
-                      className="input-field"
-                      min="1950"
-                      max="2030"
-                      required
-                    />
-                    <input
-                      type="text"
-                      placeholder="Village"
-                      value={donationForm.village}
-                      onChange={(e) => setDonationForm({...donationForm, village: e.target.value})}
-                      className="input-field"
-                      required
-                    />
-                  </div>
-                  <textarea
-                    placeholder="Notes (optional)"
-                    value={donationForm.notes}
-                    onChange={(e) => setDonationForm({...donationForm, notes: e.target.value})}
-                    className="input-field"
-                    rows="2"
-                  />
-                  <button type="submit" className="btn-primary">Record Donation</button>
-                </form>
+                {/* Record New Donation Form (Collapsible) */}
+                <div className="bg-green-50 border border-green-200 rounded-lg mb-6 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setShowDonationForm(!showDonationForm)}
+                    className="w-full px-5 py-3 flex items-center justify-between hover:bg-green-100 transition-colors"
+                  >
+                    <h2 className="text-lg font-semibold flex items-center gap-2">
+                      <Plus size={18} />
+                      Record New Donation
+                    </h2>
+                    <span className="text-green-700 font-medium">
+                      {showDonationForm ? '▼' : '►'}
+                    </span>
+                  </button>
+
+                  {showDonationForm && (
+                    <div className="px-5 pb-5 pt-2">
+                      <form onSubmit={handleAddDonation} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <input
+                            type="date"
+                            value={donationForm.date}
+                            onChange={(e) => setDonationForm({...donationForm, date: e.target.value})}
+                            className="input-field"
+                            required
+                          />
+                          <input
+                            type="text"
+                            placeholder="Donor Name"
+                            value={donationForm.donorName}
+                            onChange={(e) => setDonationForm({...donationForm, donorName: e.target.value})}
+                            className="input-field"
+                            required
+                          />
+                          <input
+                            type="number"
+                            step="0.01"
+                            placeholder="Amount"
+                            value={donationForm.amount}
+                            onChange={(e) => setDonationForm({...donationForm, amount: e.target.value})}
+                            className="input-field"
+                            required
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <input
+                            type="tel"
+                            placeholder="Phone Number"
+                            value={donationForm.phone}
+                            onChange={(e) => setDonationForm({...donationForm, phone: e.target.value})}
+                            className="input-field"
+                            required
+                          />
+                          <input
+                            type="number"
+                            placeholder="Passed Out Year"
+                            value={donationForm.alumniYear}
+                            onChange={(e) => setDonationForm({...donationForm, alumniYear: e.target.value})}
+                            className="input-field"
+                            min="1950"
+                            max="2030"
+                            required
+                          />
+                          <input
+                            type="text"
+                            placeholder="Village"
+                            value={donationForm.village}
+                            onChange={(e) => setDonationForm({...donationForm, village: e.target.value})}
+                            className="input-field"
+                            required
+                          />
+                        </div>
+                        <textarea
+                          placeholder="Notes (optional)"
+                          value={donationForm.notes}
+                          onChange={(e) => setDonationForm({...donationForm, notes: e.target.value})}
+                          className="input-field"
+                          rows="2"
+                        />
+                        <button type="submit" className="btn-primary">Record Donation</button>
+                      </form>
+                    </div>
+                  )}
+                </div>
 
                 <h3 className="text-lg font-semibold mb-4">All Donations (₹{totalDonations.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</h3>
                 <div className="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
@@ -789,62 +826,79 @@ export default function AdminDashboard() {
             {/* Expenses Tab */}
             {activeTab === 'expenses' && (
               <div>
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <Plus size={20} />
-                  Record New Expense
-                </h2>
-                <form onSubmit={handleAddExpense} className="space-y-4 mb-8">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input
-                      type="date"
-                      value={expenseForm.date}
-                      onChange={(e) => setExpenseForm({...expenseForm, date: e.target.value})}
-                      className="input-field"
-                      required
-                    />
-                    <input
-                      type="text"
-                      placeholder="Description"
-                      value={expenseForm.description}
-                      onChange={(e) => setExpenseForm({...expenseForm, description: e.target.value})}
-                      className="input-field"
-                      required
-                    />
-                    <input
-                      type="number"
-                      step="0.01"
-                      placeholder="Amount"
-                      value={expenseForm.amount}
-                      onChange={(e) => setExpenseForm({...expenseForm, amount: e.target.value})}
-                      className="input-field"
-                      required
-                    />
-                  </div>
-                  <select
-                    value={expenseForm.category}
-                    onChange={(e) => setExpenseForm({...expenseForm, category: e.target.value})}
-                    className="input-field"
-                    required
+                {/* Record New Expense Form (Collapsible) */}
+                <div className="bg-orange-50 border border-orange-200 rounded-lg mb-6 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setShowExpenseForm(!showExpenseForm)}
+                    className="w-full px-5 py-3 flex items-center justify-between hover:bg-orange-100 transition-colors"
                   >
-                    <option value="">Select Category</option>
-                    <option value="Venue">Venue</option>
-                    <option value="Food">Food</option>
-                    <option value="Entertainment">Entertainment</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Decorations">Decorations</option>
-                    <option value="Travel">Travel</option>
-                    <option value="Gifts">Gifts</option>
-                    <option value="Miscellaneous">Miscellaneous</option>
-                  </select>
-                  <textarea
-                    placeholder="Notes (optional)"
-                    value={expenseForm.notes}
-                    onChange={(e) => setExpenseForm({...expenseForm, notes: e.target.value})}
-                    className="input-field"
-                    rows="2"
-                  />
-                  <button type="submit" className="btn-primary">Record Expense</button>
-                </form>
+                    <h2 className="text-lg font-semibold flex items-center gap-2">
+                      <Plus size={18} />
+                      Record New Expense
+                    </h2>
+                    <span className="text-orange-700 font-medium">
+                      {showExpenseForm ? '▼' : '►'}
+                    </span>
+                  </button>
+
+                  {showExpenseForm && (
+                    <div className="px-5 pb-5 pt-2">
+                      <form onSubmit={handleAddExpense} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <input
+                            type="date"
+                            value={expenseForm.date}
+                            onChange={(e) => setExpenseForm({...expenseForm, date: e.target.value})}
+                            className="input-field"
+                            required
+                          />
+                          <input
+                            type="text"
+                            placeholder="Description"
+                            value={expenseForm.description}
+                            onChange={(e) => setExpenseForm({...expenseForm, description: e.target.value})}
+                            className="input-field"
+                            required
+                          />
+                          <input
+                            type="number"
+                            step="0.01"
+                            placeholder="Amount"
+                            value={expenseForm.amount}
+                            onChange={(e) => setExpenseForm({...expenseForm, amount: e.target.value})}
+                            className="input-field"
+                            required
+                          />
+                        </div>
+                        <select
+                          value={expenseForm.category}
+                          onChange={(e) => setExpenseForm({...expenseForm, category: e.target.value})}
+                          className="input-field"
+                          required
+                        >
+                          <option value="">Select Category</option>
+                          <option value="Venue">Venue</option>
+                          <option value="Food">Food</option>
+                          <option value="Entertainment">Entertainment</option>
+                          <option value="Marketing">Marketing</option>
+                          <option value="Decorations">Decorations</option>
+                          <option value="Travel">Travel</option>
+                          <option value="Gifts">Gifts</option>
+                          <option value="Miscellaneous">Miscellaneous</option>
+                        </select>
+                        <textarea
+                          placeholder="Notes (optional)"
+                          value={expenseForm.notes}
+                          onChange={(e) => setExpenseForm({...expenseForm, notes: e.target.value})}
+                          className="input-field"
+                          rows="2"
+                        />
+                        <button type="submit" className="btn-primary">Record Expense</button>
+                      </form>
+                    </div>
+                  )}
+                </div>
 
                 <h3 className="text-lg font-semibold mb-4">All Expenses (₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</h3>
                 <div className="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
@@ -885,7 +939,6 @@ export default function AdminDashboard() {
                     <thead className="border-b border-gray-200">
                       <tr className="text-left">
                         <th className="pb-3 text-xs sm:text-sm">Name</th>
-                        <th className="pb-3 text-xs sm:text-sm">Email</th>
                         <th className="pb-3 text-xs sm:text-sm">Phone</th>
                         <th className="pb-3 text-xs sm:text-sm">Village</th>
                         <th className="pb-3 text-xs sm:text-sm">Year</th>
@@ -895,7 +948,6 @@ export default function AdminDashboard() {
                       {users.map((user) => (
                         <tr key={user.id} className="border-b border-gray-100">
                           <td className="py-3 text-xs sm:text-sm">{user.firstName} {user.lastName}</td>
-                          <td className="py-3 text-xs sm:text-sm">{user.email}</td>
                           <td className="py-3 text-xs sm:text-sm">{user.phone}</td>
                           <td className="py-3 text-xs sm:text-sm">{user.village || '-'}</td>
                           <td className="py-3 text-xs sm:text-sm">{user.alumniYear}</td>
@@ -910,23 +962,16 @@ export default function AdminDashboard() {
             {/* Committee Tab */}
             {activeTab === 'committee' && (
               <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold flex items-center gap-2">
-                    <Briefcase size={24} />
-                    Manage Committees
-                  </h2>
-                </div>
-
                 {/* Create New Committee Form (Collapsible) - Super Admin Only */}
                 {currentAdmin?.isSuperAdmin && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg mb-6 overflow-hidden">
                     <button
                       type="button"
                       onClick={() => setShowCreateCommitteeForm(!showCreateCommitteeForm)}
-                      className="w-full px-6 py-4 flex items-center justify-between hover:bg-blue-100 transition-colors"
+                      className="w-full px-5 py-3 flex items-center justify-between hover:bg-blue-100 transition-colors"
                     >
                       <h3 className="text-lg font-semibold flex items-center gap-2">
-                        <Plus size={20} />
+                        <Plus size={18} />
                         Create New Committee
                       </h3>
                       <span className="text-blue-700 font-medium">
@@ -935,7 +980,7 @@ export default function AdminDashboard() {
                     </button>
 
                     {showCreateCommitteeForm && (
-                      <div className="px-6 pb-6 pt-2">
+                      <div className="px-5 pb-5 pt-2">
                         <form onSubmit={handleCreateCommittee} className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <input
@@ -1033,7 +1078,7 @@ export default function AdminDashboard() {
                               <button
                                 type="button"
                                 onClick={() => setShowAddMemberForm(!showAddMemberForm)}
-                                className="w-full px-4 py-3 flex items-center justify-between hover:bg-green-100 transition-colors"
+                                className="w-full px-5 py-3 flex items-center justify-between hover:bg-green-100 transition-colors"
                               >
                                 <h4 className="font-semibold flex items-center gap-2">
                                   <UserPlus size={18} />
@@ -1045,7 +1090,7 @@ export default function AdminDashboard() {
                               </button>
 
                               {showAddMemberForm && (
-                                <div className="px-4 pb-4 pt-1">
+                                <div className="px-5 pb-5 pt-2">
                                   <form onSubmit={handleAddMember} className="space-y-3">
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                       <input
@@ -1210,7 +1255,7 @@ export default function AdminDashboard() {
                                   <button
                                     type="button"
                                     onClick={() => setShowAddMemberForm(!showAddMemberForm)}
-                                    className="w-full px-3 py-3 flex items-center justify-between hover:bg-green-100 transition-colors"
+                                    className="w-full px-5 py-3 flex items-center justify-between hover:bg-green-100 transition-colors"
                                   >
                                     <h4 className="font-semibold text-sm flex items-center gap-2">
                                       <UserPlus size={16} />
@@ -1222,7 +1267,7 @@ export default function AdminDashboard() {
                                   </button>
 
                                   {showAddMemberForm && (
-                                    <div className="px-3 pb-3 pt-1">
+                                    <div className="px-5 pb-5 pt-2">
                                       <form onSubmit={handleAddMember} className="space-y-2">
                                         <input
                                           type="text"
@@ -1328,20 +1373,15 @@ export default function AdminDashboard() {
             {/* Admins Tab (Super Admin Only) */}
             {activeTab === 'admins' && currentAdmin?.isSuperAdmin && (
               <div>
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <Shield size={20} />
-                  Manage Administrators
-                </h2>
-                
                 {/* Add New Admin Form (Collapsible) */}
                 <div className="bg-orange-50 border border-orange-200 rounded-lg mb-8 overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setShowAddAdminForm(!showAddAdminForm)}
-                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-orange-100 transition-colors"
+                    className="w-full px-5 py-3 flex items-center justify-between hover:bg-orange-100 transition-colors"
                   >
                     <h3 className="text-lg font-semibold flex items-center gap-2">
-                      <UserPlus size={20} />
+                      <UserPlus size={18} />
                       Add New Admin
                     </h3>
                     <span className="text-orange-700 font-medium">
@@ -1350,7 +1390,7 @@ export default function AdminDashboard() {
                   </button>
 
                   {showAddAdminForm && (
-                    <div className="px-6 pb-6 pt-2">
+                    <div className="px-5 pb-5 pt-2">
                       <form onSubmit={handleAddAdmin} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <input

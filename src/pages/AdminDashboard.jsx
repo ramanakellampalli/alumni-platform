@@ -8,6 +8,7 @@ import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
 import Footer from '../components/Footer';
 import Reports from '../components/Reports';
+import BankingDetails from '../components/BankingDetails';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -485,21 +486,28 @@ export default function AdminDashboard() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="card">
-            <div className="flex items-center gap-2 mb-2">
-              <Users size={20} className="text-primary-600" />
-              <h3 className="font-semibold text-gray-700">Total Users</h3>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center text-lg cursor-help"
+                  title="Total Users"
+                >
+                  👥
+                </div>
+                <p className="text-2xl font-bold text-primary-600">{users.length}</p>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-lg cursor-help"
+                  title="Meetings"
+                >
+                  📅
+                </div>
+                <p className="text-2xl font-bold text-blue-600">{meetings.length}</p>
+              </div>
             </div>
-            <p className="text-3xl font-bold text-primary-600">{users.length}</p>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center gap-2 mb-2">
-              <Calendar size={20} className="text-blue-600" />
-              <h3 className="font-semibold text-gray-700">Meetings</h3>
-            </div>
-            <p className="text-3xl font-bold text-blue-600">{meetings.length}</p>
           </div>
 
           <div className="card">
@@ -533,7 +541,7 @@ export default function AdminDashboard() {
         <div className="bg-white rounded-lg shadow-sm mb-6">
           <div className="border-b border-gray-200 overflow-x-auto">
             <nav className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 min-w-max" aria-label="Tabs">
-              {['meetings', 'donations', 'expenses', 'users', 'committee', ...(currentAdmin?.isSuperAdmin ? ['admins'] : []), 'reports'].map((tab) => (
+              {['meetings', 'donations', 'expenses', 'users', 'committee', ...(currentAdmin?.isSuperAdmin ? ['admins'] : []), 'reports', 'banking'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -1442,6 +1450,11 @@ export default function AdminDashboard() {
             {/* Reports Tab */}
             {activeTab === 'reports' && (
               <Reports donations={donations} expenses={expenses} />
+            )}
+
+            {/* Banking Tab */}
+            {activeTab === 'banking' && (
+              <BankingDetails />
             )}
           </div>
         </div>

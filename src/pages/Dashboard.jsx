@@ -6,6 +6,7 @@ import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { LogOut, Calendar, IndianRupee, FileText, User, Video, Menu, X, Briefcase } from 'lucide-react';
 import Footer from '../components/Footer';
 import Reports from '../components/Reports';
+import BankingDetails from '../components/BankingDetails';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -306,7 +307,7 @@ export default function Dashboard() {
         <div className="bg-white rounded-lg shadow-sm mb-6">
           <div className="border-b border-gray-200 overflow-x-auto">
             <nav className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 min-w-max" aria-label="Tabs">
-              {['meetings', 'donations', 'expenses', 'committee', 'reports'].map((tab) => (
+              {['meetings', 'donations', 'expenses', 'committee', 'reports', 'banking'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -750,6 +751,11 @@ export default function Dashboard() {
             {/* Reports Tab */}
             {activeTab === 'reports' && (
               <Reports donations={donations} expenses={expenses} />
+            )}
+
+            {/* Banking Tab */}
+            {activeTab === 'banking' && (
+              <BankingDetails />
             )}
           </div>
         </div>

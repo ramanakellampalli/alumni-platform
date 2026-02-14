@@ -17,6 +17,7 @@ export default function Dashboard() {
   const [users, setUsers] = useState([]);
   const [committees, setCommittees] = useState([]);
   const [userCommittee, setUserCommittee] = useState(null);
+  const [selectedCommitteeForView, setSelectedCommitteeForView] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('meetings');
@@ -87,6 +88,16 @@ export default function Dashboard() {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
+  };
+
+  // Helper function to convert 24-hour time to 12-hour format with AM/PM
+  const formatTime12Hour = (time24) => {
+    if (!time24) return '';
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
   };
 
   // Helper function to check if meeting is currently active
@@ -365,7 +376,7 @@ export default function Dashboard() {
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-500">
                         <span className="font-medium">Time:</span>
-                        <span>{meeting.timeFrom || meeting.time} - {meeting.timeTo || 'TBD'}</span>
+                        <span>{formatTime12Hour(meeting.timeFrom || meeting.time)} - {meeting.timeTo ? formatTime12Hour(meeting.timeTo) : 'TBD'}</span>
                       </div>
 
                       {/* Committee Badge */}
@@ -446,6 +457,7 @@ export default function Dashboard() {
                       <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Year</th>
                       <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Village</th>
                       <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Notes</th>
+                      <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Recorded By</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -460,6 +472,7 @@ export default function Dashboard() {
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{donation.alumniYear || '-'}</td>
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{donation.village || '-'}</td>
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{donation.notes || '-'}</td>
+                        <td className="py-3 text-gray-500 text-xs sm:text-sm">{donation.createdBy || '-'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -519,6 +532,7 @@ export default function Dashboard() {
                       <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Amount</th>
                       <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Category</th>
                       <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Notes</th>
+                      <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Recorded By</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -533,6 +547,7 @@ export default function Dashboard() {
                         </td>
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{expense.category || '-'}</td>
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{expense.notes || '-'}</td>
+                        <td className="py-3 text-gray-500 text-xs sm:text-sm">{expense.createdBy || '-'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -592,12 +607,12 @@ export default function Dashboard() {
                                 key={committee.id}
                                 onClick={() => {
                                   const selectedComm = committees.find(c => c.id === committee.id);
-                                  setUserCommittee(selectedComm);
+                                  setSelectedCommitteeForView(selectedComm);
                                 }}
                                 className={`w-full text-left px-4 py-3 transition-colors ${
                                   index !== committees.length - 1 ? 'border-b border-gray-200' : ''
                                 } ${
-                                  userCommittee?.id === committee.id
+                                  selectedCommitteeForView?.id === committee.id
                                     ? 'bg-primary-50 text-primary-900 border-l-4 border-l-primary-600'
                                     : 'bg-white text-gray-700 hover:bg-gray-50'
                                 }`}
@@ -622,19 +637,19 @@ export default function Dashboard() {
 
                       {/* Right Panel: Committee Details (75%) */}
                       <div className="md:col-span-3">
-                        {userCommittee ? (
+                        {selectedCommitteeForView ? (
                           <div>
                             {/* Committee Header */}
                             <div className="mb-4">
-                              <h3 className="text-lg font-semibold">{userCommittee.name}</h3>
-                              {userCommittee.description && (
-                                <p className="text-sm text-gray-600">{userCommittee.description}</p>
+                              <h3 className="text-lg font-semibold">{selectedCommitteeForView.name}</h3>
+                              {selectedCommitteeForView.description && (
+                                <p className="text-sm text-gray-600">{selectedCommitteeForView.description}</p>
                               )}
                             </div>
 
                             {/* Members Table */}
                             <div>
-                              {users.filter(u => u.committeeId === userCommittee.id).length === 0 ? (
+                              {users.filter(u => u.committeeId === selectedCommitteeForView.id).length === 0 ? (
                                 <p className="text-gray-500 text-center py-6">No members in this committee.</p>
                               ) : (
                                 <div className="overflow-x-auto border border-gray-200 rounded-lg">
@@ -649,7 +664,7 @@ export default function Dashboard() {
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
                                       {users
-                                        .filter(u => u.committeeId === userCommittee.id)
+                                        .filter(u => u.committeeId === selectedCommitteeForView.id)
                                         .map((member) => (
                                           <tr key={member.id} className={`transition-colors ${member.id === currentUser?.id ? 'bg-primary-50 hover:bg-primary-100' : 'hover:bg-gray-50'}`}>
                                             <td className="px-4 py-3.5 text-sm font-medium text-gray-900">
@@ -679,7 +694,7 @@ export default function Dashboard() {
                     <div className="md:hidden space-y-2">
                       {committees.map((committee) => {
                         const committeeMembers = users.filter(u => u.committeeId === committee.id);
-                        const isExpanded = userCommittee?.id === committee.id;
+                        const isExpanded = selectedCommitteeForView?.id === committee.id;
                         const isUserCommittee = committee.id === currentUser?.committeeId;
 
                         return (
@@ -688,7 +703,7 @@ export default function Dashboard() {
                             <button
                               onClick={() => {
                                 const selectedComm = isExpanded ? null : committees.find(c => c.id === committee.id);
-                                setUserCommittee(selectedComm);
+                                setSelectedCommitteeForView(selectedComm);
                               }}
                               className={`w-full px-4 py-3 transition-colors flex items-center justify-between ${
                                 isExpanded ? 'bg-primary-50' : 'bg-white hover:bg-gray-50'
@@ -708,7 +723,7 @@ export default function Dashboard() {
                                   )}
                                 </div>
                               </div>
-                              <span className="text-gray-500 text-sm">{isExpanded ? '▼' : '►'}</span>
+                              <span className="text-gray-500 text-sm">{isExpanded ? '▼' : '>'}</span>
                             </button>
 
                             {/* Expanded Content */}

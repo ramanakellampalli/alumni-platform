@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../config/firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { LogOut, Calendar, IndianRupee, FileText, User, Video, Menu, X } from 'lucide-react';
+import { LogOut, Calendar, IndianRupee, FileText, User, Video, Menu, X, Briefcase } from 'lucide-react';
 import Footer from '../components/Footer';
 import Reports from '../components/Reports';
 
@@ -14,6 +14,8 @@ export default function Dashboard() {
   const [donations, setDonations] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [users, setUsers] = useState([]);
+  const [committees, setCommittees] = useState([]);
+  const [userCommittee, setUserCommittee] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('meetings');
@@ -51,6 +53,17 @@ export default function Dashboard() {
       // Fetch users
       const usersSnapshot = await getDocs(collection(db, 'users'));
       setUsers(usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+
+      // Fetch committees
+      const committeesSnapshot = await getDocs(collection(db, 'committees'));
+      const committeesData = committeesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setCommittees(committeesData);
+
+      // Find user's committee
+      if (currentUser?.committeeId) {
+        const committee = committeesData.find(c => c.id === currentUser.committeeId);
+        setUserCommittee(committee || null);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -216,7 +229,7 @@ export default function Dashboard() {
             <div className="w-12 h-12 rounded-full bg-primary-700 flex items-center justify-center text-white font-bold text-lg">
               {(currentUser?.firstName?.[0] || '').toUpperCase()}{(currentUser?.lastName?.[0] || '').toUpperCase()}
             </div>
-            <div>
+            <div className="flex-1">
               <h2 className="text-xl font-semibold">
                 Welcome, {currentUser?.firstName || 'Alumni'}!
               </h2>
@@ -225,7 +238,23 @@ export default function Dashboard() {
                 Class of {currentUser?.alumniYear}
               </p>
             </div>
+            {userCommittee && (
+              <div className="hidden sm:block">
+                <div className="flex items-center gap-2 bg-primary-50 border border-primary-200 px-3 py-2 rounded-lg">
+                  <Briefcase size={16} className="text-primary-600" />
+                  <span className="text-sm font-medium text-primary-900">{userCommittee.name}</span>
+                </div>
+              </div>
+            )}
           </div>
+          {userCommittee && (
+            <div className="sm:hidden mt-2">
+              <div className="flex items-center gap-2 bg-primary-50 border border-primary-200 px-3 py-2 rounded-lg w-fit">
+                <Briefcase size={16} className="text-primary-600" />
+                <span className="text-sm font-medium text-primary-900">{userCommittee.name}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Stats Cards */}
@@ -277,7 +306,7 @@ export default function Dashboard() {
         <div className="bg-white rounded-lg shadow-sm mb-6">
           <div className="border-b border-gray-200 overflow-x-auto">
             <nav className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 min-w-max" aria-label="Tabs">
-              {['meetings', 'donations', 'expenses', 'reports'].map((tab) => (
+              {['meetings', 'donations', 'expenses', 'committee', 'reports'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -306,7 +335,17 @@ export default function Dashboard() {
               {meetings.map((meeting) => {
                 const isActive = isMeetingActive(meeting);
                 const isPast = isMeetingPast(meeting);
-                
+
+                // Check if user has access to this meeting
+                const hasAccess = meeting.committeeIds && meeting.committeeIds.length > 0
+                  ? meeting.committeeIds.includes(currentUser?.committeeId)
+                  : false;
+
+                // Get committee names for this meeting
+                const meetingCommittees = meeting.committeeIds
+                  ? committees.filter(c => meeting.committeeIds.includes(c.id))
+                  : [];
+
                 return (
                   <div key={meeting.id} className="border border-gray-200 rounded-lg p-4 hover:border-primary-300 transition-colors">
                     <div className="mb-2">
@@ -327,23 +366,52 @@ export default function Dashboard() {
                         <span className="font-medium">Time:</span>
                         <span>{meeting.timeFrom || meeting.time} - {meeting.timeTo || 'TBD'}</span>
                       </div>
+
+                      {/* Committee Badge */}
+                      {meetingCommittees.length > 0 && (
+                        <div className="flex items-start gap-2 text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                          <Briefcase size={12} className="mt-0.5 flex-shrink-0" />
+                          <span className="flex-1">
+                            {meetingCommittees.map(c => c.name).join(', ')}
+                          </span>
+                        </div>
+                      )}
+
                       {meeting.zoomLink && (
-                        <a
-                          href={isPast ? '#' : meeting.zoomLink}
-                          target={isPast ? '' : '_blank'}
-                          rel="noopener noreferrer"
-                          className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full ${
-                            isPast
-                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : isActive
-                              ? 'bg-green-600 text-white hover:bg-green-700 animate-pulse'
-                              : 'bg-primary-600 text-white hover:bg-primary-700'
-                          }`}
-                          onClick={(e) => isPast && e.preventDefault()}
-                        >
-                          <Video size={16} />
-                          {isPast ? 'Meeting Ended' : isActive ? 'Join Now (Live)' : 'Join Meeting'}
-                        </a>
+                        <>
+                          {hasAccess ? (
+                            <a
+                              href={isPast ? '#' : meeting.zoomLink}
+                              target={isPast ? '' : '_blank'}
+                              rel="noopener noreferrer"
+                              className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full ${
+                                isPast
+                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  : isActive
+                                  ? 'bg-green-600 text-white hover:bg-green-700 animate-pulse'
+                                  : 'bg-primary-600 text-white hover:bg-primary-700'
+                              }`}
+                              onClick={(e) => isPast && e.preventDefault()}
+                            >
+                              <Video size={16} />
+                              {isPast ? 'Meeting Ended' : isActive ? 'Join Now (Live)' : 'Join Meeting'}
+                            </a>
+                          ) : (
+                            <div className="space-y-1">
+                              <button
+                                disabled
+                                className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium w-full bg-gray-200 text-gray-400 cursor-not-allowed"
+                                title="This meeting is restricted to specific committees"
+                              >
+                                <Video size={16} />
+                                Meeting Restricted
+                              </button>
+                              <p className="text-xs text-gray-500 text-center">
+                                This meeting is for {meetingCommittees.map(c => c.name).join(', ')} only
+                              </p>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
@@ -499,6 +567,183 @@ export default function Dashboard() {
               )}
             </>
           )}
+              </div>
+            )}
+
+            {/* Committee Tab */}
+            {activeTab === 'committee' && (
+              <div>
+                {committees.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">No committees available yet.</p>
+                ) : (
+                  <>
+                    {/* Desktop Layout: 2-Column */}
+                    <div className="hidden md:grid md:grid-cols-4 gap-6">
+                      {/* Left Panel: Committee List (25%) */}
+                      <div className="md:col-span-1">
+                        <h3 className="font-semibold text-gray-700 mb-3 text-sm">Committees ({committees.length})</h3>
+                        <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                          {committees.map((committee, index) => {
+                            const isUserCommittee = committee.id === currentUser?.committeeId;
+                            const memberCount = users.filter(u => u.committeeId === committee.id).length;
+                            return (
+                              <button
+                                key={committee.id}
+                                onClick={() => {
+                                  const selectedComm = committees.find(c => c.id === committee.id);
+                                  setUserCommittee(selectedComm);
+                                }}
+                                className={`w-full text-left px-4 py-3 transition-colors ${
+                                  index !== committees.length - 1 ? 'border-b border-gray-200' : ''
+                                } ${
+                                  userCommittee?.id === committee.id
+                                    ? 'bg-primary-50 text-primary-900 border-l-4 border-l-primary-600'
+                                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                                }`}
+                              >
+                                <div className="text-sm font-medium">
+                                  <div className="flex items-center justify-between">
+                                    <span>{committee.name}</span>
+                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                      <User size={14} />
+                                      <span>{memberCount}</span>
+                                    </div>
+                                  </div>
+                                  {isUserCommittee && (
+                                    <span className="text-xs text-primary-600 mt-1 block">(Your Committee)</span>
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Right Panel: Committee Details (75%) */}
+                      <div className="md:col-span-3">
+                        {userCommittee ? (
+                          <div>
+                            {/* Committee Header */}
+                            <div className="mb-4">
+                              <h3 className="text-lg font-semibold">{userCommittee.name}</h3>
+                              {userCommittee.description && (
+                                <p className="text-sm text-gray-600">{userCommittee.description}</p>
+                              )}
+                            </div>
+
+                            {/* Members Table */}
+                            <div>
+                              {users.filter(u => u.committeeId === userCommittee.id).length === 0 ? (
+                                <p className="text-gray-500 text-center py-6">No members in this committee.</p>
+                              ) : (
+                                <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                                  <table className="w-full">
+                                    <thead className="bg-gray-50">
+                                      <tr className="text-left">
+                                        <th className="px-4 py-3.5 text-sm font-semibold text-gray-700">Name</th>
+                                        <th className="px-4 py-3.5 text-sm font-semibold text-gray-700">Phone</th>
+                                        <th className="px-4 py-3.5 text-sm font-semibold text-gray-700">Year</th>
+                                        <th className="px-4 py-3.5 text-sm font-semibold text-gray-700">Village</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                      {users
+                                        .filter(u => u.committeeId === userCommittee.id)
+                                        .map((member) => (
+                                          <tr key={member.id} className={`transition-colors ${member.id === currentUser?.id ? 'bg-primary-50 hover:bg-primary-100' : 'hover:bg-gray-50'}`}>
+                                            <td className="px-4 py-3.5 text-sm font-medium text-gray-900">
+                                              {member.firstName} {member.lastName}
+                                              {member.id === currentUser?.id && (
+                                                <span className="ml-2 text-xs font-semibold text-primary-700 bg-primary-100 px-2 py-0.5 rounded">(You)</span>
+                                              )}
+                                            </td>
+                                            <td className="px-4 py-3.5 text-sm text-gray-600">{member.phone}</td>
+                                            <td className="px-4 py-3.5 text-sm text-gray-600">{member.alumniYear}</td>
+                                            <td className="px-4 py-3.5 text-sm text-gray-600">{member.village || '-'}</td>
+                                          </tr>
+                                        ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-gray-500 text-center py-8">Select a committee to view members</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Mobile Layout: Accordion */}
+                    <div className="md:hidden space-y-2">
+                      {committees.map((committee) => {
+                        const committeeMembers = users.filter(u => u.committeeId === committee.id);
+                        const isExpanded = userCommittee?.id === committee.id;
+                        const isUserCommittee = committee.id === currentUser?.committeeId;
+
+                        return (
+                          <div key={committee.id} className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                            {/* Committee Header (Accordion Toggle) */}
+                            <button
+                              onClick={() => {
+                                const selectedComm = isExpanded ? null : committees.find(c => c.id === committee.id);
+                                setUserCommittee(selectedComm);
+                              }}
+                              className={`w-full px-4 py-3 transition-colors flex items-center justify-between ${
+                                isExpanded ? 'bg-primary-50' : 'bg-white hover:bg-gray-50'
+                              }`}
+                            >
+                              <div className="text-left flex-1">
+                                <div className="font-medium text-sm text-gray-800">
+                                  <div className="flex items-center justify-between">
+                                    <span>{committee.name}</span>
+                                    <div className="flex items-center gap-1 text-xs text-gray-500 mr-2">
+                                      <User size={14} />
+                                      <span>{committeeMembers.length}</span>
+                                    </div>
+                                  </div>
+                                  {isUserCommittee && (
+                                    <span className="text-xs text-primary-600 mt-1 block">(Your Committee)</span>
+                                  )}
+                                </div>
+                              </div>
+                              <span className="text-gray-500 text-sm">{isExpanded ? '▼' : '►'}</span>
+                            </button>
+
+                            {/* Expanded Content */}
+                            {isExpanded && (
+                              <div className="p-4">
+                                {/* Members List (Cards) */}
+                                <div>
+                                  {committeeMembers.length === 0 ? (
+                                    <p className="text-gray-500 text-sm text-center py-4">No members yet</p>
+                                  ) : (
+                                    <div className="space-y-2">
+                                      {committeeMembers.map((member) => (
+                                        <div key={member.id} className={`border border-gray-200 rounded-lg p-3 ${member.id === currentUser?.id ? 'bg-primary-50 border-primary-200' : 'bg-white'}`}>
+                                          <div className="font-medium text-sm">
+                                            {member.firstName} {member.lastName}
+                                            {member.id === currentUser?.id && (
+                                              <span className="ml-2 text-xs font-medium text-primary-600">(You)</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-600 mt-1">
+                                            {member.alumniYear} • {member.village || 'N/A'}
+                                          </div>
+                                          <div className="text-xs text-gray-500 mt-1">📞 {member.phone}</div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
               </div>
             )}
 

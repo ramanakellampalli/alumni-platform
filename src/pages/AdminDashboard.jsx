@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../config/firebase';
-import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc, updateDoc, where } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { LogOut, Plus, Calendar, IndianRupee, FileText, Users, Trash2, User, Shield, UserPlus, Menu, X, Eye, EyeOff } from 'lucide-react';
+import { LogOut, Plus, Calendar, IndianRupee, FileText, Users, Trash2, User, Shield, UserPlus, Menu, X, Eye, EyeOff, Briefcase, UserMinus } from 'lucide-react';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
 import Footer from '../components/Footer';
@@ -18,6 +18,8 @@ export default function AdminDashboard() {
   const [expenses, setExpenses] = useState([]);
   const [users, setUsers] = useState([]);
   const [admins, setAdmins] = useState([]);
+  const [committees, setCommittees] = useState([]);
+  const [selectedCommittee, setSelectedCommittee] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showAdminPassword, setShowAdminPassword] = useState(false);
@@ -40,7 +42,8 @@ export default function AdminDashboard() {
     timeFrom: '',
     timeTo: '',
     description: '',
-    zoomLink: ''
+    zoomLink: '',
+    committeeIds: []
   });
   const [donationForm, setDonationForm] = useState({
     date: '',
@@ -61,6 +64,15 @@ export default function AdminDashboard() {
   const [adminForm, setAdminForm] = useState({
     email: '', password: '', name: ''
   });
+  const [committeeForm, setCommitteeForm] = useState({
+    name: '', description: ''
+  });
+  const [memberForm, setMemberForm] = useState({
+    firstName: '', lastName: '', phone: '', alumniYear: '', village: ''
+  });
+  const [showCreateCommitteeForm, setShowCreateCommitteeForm] = useState(false);
+  const [showAddMemberForm, setShowAddMemberForm] = useState(false);
+  const [showAddAdminForm, setShowAddAdminForm] = useState(false);
 
   useEffect(() => {
     // Check if admin is logged in via Firebase Auth
@@ -104,6 +116,16 @@ export default function AdminDashboard() {
       // Fetch admins
       const adminsSnapshot = await getDocs(collection(db, 'admins'));
       setAdmins(adminsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+
+      // Fetch committees
+      const committeesSnapshot = await getDocs(collection(db, 'committees'));
+      const committeesData = committeesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setCommittees(committeesData);
+
+      // Auto-select first committee if available
+      if (committeesData.length > 0 && !selectedCommittee) {
+        setSelectedCommittee(committeesData[0]);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -113,10 +135,17 @@ export default function AdminDashboard() {
 
   const handleAddMeeting = async (e) => {
     e.preventDefault();
+
+    // Validate at least one committee is selected
+    if (meetingForm.committeeIds.length === 0) {
+      showToast('Please select at least one committee for this meeting', 'error');
+      return;
+    }
+
     try {
       await addDoc(collection(db, 'meetings'), meetingForm);
       showToast('Meeting added successfully!');
-      setMeetingForm({ title: '', date: '', timeFrom: '', timeTo: '', description: '', zoomLink: '' });
+      setMeetingForm({ title: '', date: '', timeFrom: '', timeTo: '', description: '', zoomLink: '', committeeIds: [] });
       fetchData();
     } catch (error) {
       console.error('Error adding meeting:', error);
@@ -234,6 +263,107 @@ export default function AdminDashboard() {
         } catch (error) {
           console.error('Error removing admin:', error);
           showToast('Failed to remove admin', 'error');
+        }
+      }
+    });
+  };
+
+  // Committee Management Functions
+  const handleCreateCommittee = async (e) => {
+    e.preventDefault();
+    try {
+      await addDoc(collection(db, 'committees'), {
+        ...committeeForm,
+        createdAt: new Date().toISOString(),
+        createdBy: currentAdmin.uid
+      });
+      showToast('Committee created successfully!');
+      setCommitteeForm({ name: '', description: '' });
+      fetchData();
+    } catch (error) {
+      console.error('Error creating committee:', error);
+      showToast('Failed to create committee', 'error');
+    }
+  };
+
+  const handleDeleteCommittee = async (committeeId) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Committee',
+      message: 'Are you sure you want to delete this committee? All members will be removed from this committee.',
+      onConfirm: async () => {
+        try {
+          // Remove all members from this committee
+          const usersInCommittee = users.filter(u => u.committeeId === committeeId);
+          for (const user of usersInCommittee) {
+            await updateDoc(doc(db, 'users', user.id), { committeeId: null });
+          }
+
+          // Delete the committee
+          await deleteDoc(doc(db, 'committees', committeeId));
+          showToast('Committee deleted successfully!');
+          setSelectedCommittee(null);
+          fetchData();
+        } catch (error) {
+          console.error('Error deleting committee:', error);
+          showToast('Failed to delete committee', 'error');
+        }
+      }
+    });
+  };
+
+  const handleAddMember = async (e) => {
+    e.preventDefault();
+    if (!selectedCommittee) {
+      showToast('Please select a committee first', 'error');
+      return;
+    }
+
+    try {
+      // Check if user exists by phone number
+      const userQuery = query(collection(db, 'users'), where('phone', '==', memberForm.phone));
+      const userSnapshot = await getDocs(userQuery);
+
+      if (!userSnapshot.empty) {
+        // User exists - update their committeeId
+        const existingUser = userSnapshot.docs[0];
+        await updateDoc(doc(db, 'users', existingUser.id), {
+          committeeId: selectedCommittee.id
+        });
+        showToast(`${existingUser.data().firstName} ${existingUser.data().lastName} added to committee!`);
+      } else {
+        // User doesn't exist - create new user
+        await addDoc(collection(db, 'users'), {
+          ...memberForm,
+          committeeId: selectedCommittee.id,
+          email: null, // Email is optional
+          isAdmin: false,
+          createdAt: new Date().toISOString()
+        });
+        showToast('New member added to committee!');
+      }
+
+      setMemberForm({ firstName: '', lastName: '', phone: '', alumniYear: '', village: '' });
+      fetchData();
+    } catch (error) {
+      console.error('Error adding member:', error);
+      showToast('Failed to add member', 'error');
+    }
+  };
+
+  const handleRemoveMember = async (userId) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Remove Member',
+      message: 'Are you sure you want to remove this member from the committee? They will remain as a registered user.',
+      onConfirm: async () => {
+        try {
+          await updateDoc(doc(db, 'users', userId), { committeeId: null });
+          showToast('Member removed from committee!');
+          fetchData();
+        } catch (error) {
+          console.error('Error removing member:', error);
+          showToast('Failed to remove member', 'error');
         }
       }
     });
@@ -403,7 +533,7 @@ export default function AdminDashboard() {
         <div className="bg-white rounded-lg shadow-sm mb-6">
           <div className="border-b border-gray-200 overflow-x-auto">
             <nav className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 min-w-max" aria-label="Tabs">
-              {['meetings', 'donations', 'expenses', 'users', ...(currentAdmin?.isSuperAdmin ? ['admins'] : []), 'reports'].map((tab) => (
+              {['meetings', 'donations', 'expenses', 'users', 'committee', ...(currentAdmin?.isSuperAdmin ? ['admins'] : []), 'reports'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -469,13 +599,31 @@ export default function AdminDashboard() {
                     rows="3"
                     required
                   />
-                  <input
-                    type="url"
-                    placeholder="Meeting Link (Zoom, Google Meet, etc.)"
-                    value={meetingForm.zoomLink}
-                    onChange={(e) => setMeetingForm({...meetingForm, zoomLink: e.target.value})}
-                    className="input-field"
-                  />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input
+                      type="url"
+                      placeholder="Meeting Link (Zoom, Google Meet, etc.)"
+                      value={meetingForm.zoomLink}
+                      onChange={(e) => setMeetingForm({...meetingForm, zoomLink: e.target.value})}
+                      className="input-field"
+                    />
+
+                    <select
+                      value={meetingForm.committeeIds[0] || ''}
+                      onChange={(e) => setMeetingForm({...meetingForm, committeeIds: e.target.value ? [e.target.value] : []})}
+                      className="input-field"
+                      required
+                    >
+                      <option value="">Select Committee</option>
+                      {committees.map((committee) => (
+                        <option key={committee.id} value={committee.id}>
+                          {committee.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
                   <button type="submit" className="btn-primary">Add Meeting</button>
                 </form>
 
@@ -503,6 +651,11 @@ export default function AdminDashboard() {
                       <p className="text-sm text-gray-500 mb-2">
                         🕐 {meeting.timeFrom || meeting.time} - {meeting.timeTo || ''}
                       </p>
+                      {meeting.committeeIds && meeting.committeeIds.length > 0 && (
+                        <p className="text-xs text-gray-600 mb-2">
+                          🏢 {meeting.committeeIds.map(id => committees.find(c => c.id === id)?.name || 'Unknown').join(', ')}
+                        </p>
+                      )}
                       {meeting.zoomLink && (
                         <a
                           href={meeting.zoomLink}
@@ -746,6 +899,424 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {/* Committee Tab */}
+            {activeTab === 'committee' && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold flex items-center gap-2">
+                    <Briefcase size={24} />
+                    Manage Committees
+                  </h2>
+                </div>
+
+                {/* Create New Committee Form (Collapsible) - Super Admin Only */}
+                {currentAdmin?.isSuperAdmin && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg mb-6 overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateCommitteeForm(!showCreateCommitteeForm)}
+                      className="w-full px-6 py-4 flex items-center justify-between hover:bg-blue-100 transition-colors"
+                    >
+                      <h3 className="text-lg font-semibold flex items-center gap-2">
+                        <Plus size={20} />
+                        Create New Committee
+                      </h3>
+                      <span className="text-blue-700 font-medium">
+                        {showCreateCommitteeForm ? '▼' : '►'}
+                      </span>
+                    </button>
+
+                    {showCreateCommitteeForm && (
+                      <div className="px-6 pb-6 pt-2">
+                        <form onSubmit={handleCreateCommittee} className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input
+                              type="text"
+                              placeholder="Committee Name"
+                              value={committeeForm.name}
+                              onChange={(e) => setCommitteeForm({...committeeForm, name: e.target.value})}
+                              className="input-field"
+                              required
+                            />
+                            <input
+                              type="text"
+                              placeholder="Description (optional)"
+                              value={committeeForm.description}
+                              onChange={(e) => setCommitteeForm({...committeeForm, description: e.target.value})}
+                              className="input-field"
+                            />
+                          </div>
+                          <button type="submit" className="btn-primary">
+                            <Plus size={18} className="inline mr-2" />
+                            Create Committee
+                          </button>
+                        </form>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {committees.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">
+                    {currentAdmin?.isSuperAdmin
+                      ? 'No committees created yet. Create one above to get started!'
+                      : 'No committees available yet.'}
+                  </p>
+                ) : (
+                  <>
+                    {/* Desktop Layout: 2-Column */}
+                    <div className="hidden md:grid md:grid-cols-4 gap-6">
+                      {/* Left Panel: Committee List (25%) */}
+                      <div className="md:col-span-1">
+                        <h3 className="font-semibold text-gray-700 mb-3 text-sm">Committees ({committees.length})</h3>
+                        <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                          {committees.map((committee, index) => {
+                            const memberCount = users.filter(u => u.committeeId === committee.id).length;
+                            return (
+                              <button
+                                key={committee.id}
+                                onClick={() => setSelectedCommittee(committee)}
+                                className={`w-full text-left px-4 py-3 transition-colors ${
+                                  index !== committees.length - 1 ? 'border-b border-gray-200' : ''
+                                } ${
+                                  selectedCommittee?.id === committee.id
+                                    ? 'bg-primary-50 text-primary-900 border-l-4 border-l-primary-600'
+                                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm font-medium">{committee.name}</span>
+                                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                                    <Users size={14} />
+                                    <span>{memberCount}</span>
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Right Panel: Committee Details (75%) */}
+                      <div className="md:col-span-3">
+                        {selectedCommittee ? (
+                          <div>
+                            {/* Committee Header */}
+                            <div className="flex items-center justify-between mb-4">
+                              <div>
+                                <h3 className="text-lg font-semibold">{selectedCommittee.name}</h3>
+                                {selectedCommittee.description && (
+                                  <p className="text-sm text-gray-600">{selectedCommittee.description}</p>
+                                )}
+                              </div>
+                              {currentAdmin?.isSuperAdmin && (
+                                <button
+                                  onClick={() => handleDeleteCommittee(selectedCommittee.id)}
+                                  className="text-red-600 hover:text-red-800 text-sm flex items-center gap-1"
+                                >
+                                  <Trash2 size={16} />
+                                  Delete Committee
+                                </button>
+                              )}
+                            </div>
+
+                            {/* Add Member Form (Collapsible) */}
+                            <div className="bg-green-50 border border-green-200 rounded-lg mb-4 overflow-hidden">
+                              <button
+                                type="button"
+                                onClick={() => setShowAddMemberForm(!showAddMemberForm)}
+                                className="w-full px-4 py-3 flex items-center justify-between hover:bg-green-100 transition-colors"
+                              >
+                                <h4 className="font-semibold flex items-center gap-2">
+                                  <UserPlus size={18} />
+                                  Add Member
+                                </h4>
+                                <span className="text-green-700 font-medium">
+                                  {showAddMemberForm ? '▼' : '►'}
+                                </span>
+                              </button>
+
+                              {showAddMemberForm && (
+                                <div className="px-4 pb-4 pt-1">
+                                  <form onSubmit={handleAddMember} className="space-y-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                      <input
+                                        type="text"
+                                        placeholder="First Name"
+                                        value={memberForm.firstName}
+                                        onChange={(e) => setMemberForm({...memberForm, firstName: e.target.value})}
+                                        className="input-field"
+                                        required
+                                      />
+                                      <input
+                                        type="text"
+                                        placeholder="Last Name"
+                                        value={memberForm.lastName}
+                                        onChange={(e) => setMemberForm({...memberForm, lastName: e.target.value})}
+                                        className="input-field"
+                                        required
+                                      />
+                                      <input
+                                        type="tel"
+                                        placeholder="Phone Number"
+                                        value={memberForm.phone}
+                                        onChange={(e) => setMemberForm({...memberForm, phone: e.target.value})}
+                                        className="input-field"
+                                        required
+                                      />
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                      <input
+                                        type="number"
+                                        placeholder="Passed Out Year"
+                                        value={memberForm.alumniYear}
+                                        onChange={(e) => setMemberForm({...memberForm, alumniYear: e.target.value})}
+                                        className="input-field"
+                                        min="1950"
+                                        max="2030"
+                                        required
+                                      />
+                                      <input
+                                        type="text"
+                                        placeholder="Village"
+                                        value={memberForm.village}
+                                        onChange={(e) => setMemberForm({...memberForm, village: e.target.value})}
+                                        className="input-field"
+                                        required
+                                      />
+                                    </div>
+                                    <button type="submit" className="btn-primary">
+                                      <UserPlus size={16} className="inline mr-2" />
+                                      Add Member
+                                    </button>
+                                  </form>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Members Table */}
+                            <div>
+                              {users.filter(u => u.committeeId === selectedCommittee.id).length === 0 ? (
+                                <p className="text-gray-500 text-center py-6">No members in this committee yet.</p>
+                              ) : (
+                                <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                                  <table className="w-full">
+                                    <thead className="bg-gray-50">
+                                      <tr className="text-left">
+                                        <th className="px-4 py-3.5 text-sm font-semibold text-gray-700">Name</th>
+                                        <th className="px-4 py-3.5 text-sm font-semibold text-gray-700">Phone</th>
+                                        <th className="px-4 py-3.5 text-sm font-semibold text-gray-700">Year</th>
+                                        <th className="px-4 py-3.5 text-sm font-semibold text-gray-700">Village</th>
+                                        <th className="px-4 py-3.5 text-sm font-semibold text-gray-700">Actions</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                      {users
+                                        .filter(u => u.committeeId === selectedCommittee.id)
+                                        .map((member) => (
+                                          <tr key={member.id} className="hover:bg-gray-50 transition-colors">
+                                            <td className="px-4 py-3.5 text-sm font-medium text-gray-900">{member.firstName} {member.lastName}</td>
+                                            <td className="px-4 py-3.5 text-sm text-gray-600">{member.phone}</td>
+                                            <td className="px-4 py-3.5 text-sm text-gray-600">{member.alumniYear}</td>
+                                            <td className="px-4 py-3.5 text-sm text-gray-600">{member.village || '-'}</td>
+                                            <td className="px-4 py-3.5 text-sm">
+                                              {currentAdmin?.isSuperAdmin ? (
+                                                <button
+                                                  onClick={() => handleRemoveMember(member.id)}
+                                                  className="inline-flex items-center gap-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1 rounded transition-colors"
+                                                >
+                                                  <UserMinus size={16} />
+                                                  <span className="font-medium">Remove</span>
+                                                </button>
+                                              ) : (
+                                                <button
+                                                  disabled
+                                                  title="Restricted - Super Admin Only"
+                                                  className="inline-flex items-center gap-1.5 text-gray-400 px-2 py-1 rounded cursor-not-allowed"
+                                                  style={{ pointerEvents: 'auto' }}
+                                                >
+                                                  <UserMinus size={16} />
+                                                  <span className="font-medium select-none">Remove</span>
+                                                </button>
+                                              )}
+                                            </td>
+                                          </tr>
+                                        ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-gray-500 text-center py-8">Select a committee to view and manage members</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Mobile Layout: Accordion */}
+                    <div className="md:hidden space-y-2">
+                      {committees.map((committee) => {
+                        const committeeMembers = users.filter(u => u.committeeId === committee.id);
+                        const isExpanded = selectedCommittee?.id === committee.id;
+
+                        return (
+                          <div key={committee.id} className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                            {/* Committee Header (Accordion Toggle) */}
+                            <button
+                              onClick={() => setSelectedCommittee(isExpanded ? null : committee)}
+                              className={`w-full px-4 py-3 transition-colors flex items-center justify-between ${
+                                isExpanded ? 'bg-primary-50' : 'bg-white hover:bg-gray-50'
+                              }`}
+                            >
+                              <div className="text-left flex-1">
+                                <div className="font-medium text-sm text-gray-800 flex items-center justify-between">
+                                  <span>{committee.name}</span>
+                                  <div className="flex items-center gap-1 text-xs text-gray-500 mr-2">
+                                    <Users size={14} />
+                                    <span>{committeeMembers.length}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {currentAdmin?.isSuperAdmin && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteCommittee(committee.id);
+                                    }}
+                                    className="p-2 text-red-600 hover:bg-red-50 rounded"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                )}
+                                <span className="text-gray-500 text-sm">{isExpanded ? '▼' : '►'}</span>
+                              </div>
+                            </button>
+
+                            {/* Expanded Content */}
+                            {isExpanded && (
+                              <div className="p-4 space-y-4">
+                                {/* Add Member Form (Collapsible) */}
+                                <div className="bg-green-50 border border-green-200 rounded-lg overflow-hidden">
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowAddMemberForm(!showAddMemberForm)}
+                                    className="w-full px-3 py-3 flex items-center justify-between hover:bg-green-100 transition-colors"
+                                  >
+                                    <h4 className="font-semibold text-sm flex items-center gap-2">
+                                      <UserPlus size={16} />
+                                      Add Member
+                                    </h4>
+                                    <span className="text-green-700 font-medium">
+                                      {showAddMemberForm ? '▼' : '►'}
+                                    </span>
+                                  </button>
+
+                                  {showAddMemberForm && (
+                                    <div className="px-3 pb-3 pt-1">
+                                      <form onSubmit={handleAddMember} className="space-y-2">
+                                        <input
+                                          type="text"
+                                          placeholder="First Name"
+                                          value={memberForm.firstName}
+                                          onChange={(e) => setMemberForm({...memberForm, firstName: e.target.value})}
+                                          className="input-field text-sm"
+                                          required
+                                        />
+                                        <input
+                                          type="text"
+                                          placeholder="Last Name"
+                                          value={memberForm.lastName}
+                                          onChange={(e) => setMemberForm({...memberForm, lastName: e.target.value})}
+                                          className="input-field text-sm"
+                                          required
+                                        />
+                                        <input
+                                          type="tel"
+                                          placeholder="Phone Number"
+                                          value={memberForm.phone}
+                                          onChange={(e) => setMemberForm({...memberForm, phone: e.target.value})}
+                                          className="input-field text-sm"
+                                          required
+                                        />
+                                        <input
+                                          type="number"
+                                          placeholder="Passed Out Year"
+                                          value={memberForm.alumniYear}
+                                          onChange={(e) => setMemberForm({...memberForm, alumniYear: e.target.value})}
+                                          className="input-field text-sm"
+                                          min="1950"
+                                          max="2030"
+                                          required
+                                        />
+                                        <input
+                                          type="text"
+                                          placeholder="Village"
+                                          value={memberForm.village}
+                                          onChange={(e) => setMemberForm({...memberForm, village: e.target.value})}
+                                          className="input-field text-sm"
+                                          required
+                                        />
+                                        <button type="submit" className="btn-primary w-full text-sm">
+                                          <UserPlus size={14} className="inline mr-2" />
+                                          Add Member
+                                        </button>
+                                      </form>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Members List (Cards) */}
+                                <div>
+                                  {committeeMembers.length === 0 ? (
+                                    <p className="text-gray-500 text-sm text-center py-4">No members yet</p>
+                                  ) : (
+                                    <div className="space-y-2">
+                                      {committeeMembers.map((member) => (
+                                        <div key={member.id} className="bg-white border border-gray-200 rounded-lg p-3">
+                                          <div className="flex items-start justify-between">
+                                            <div className="flex-1">
+                                              <div className="font-medium text-sm">{member.firstName} {member.lastName}</div>
+                                              <div className="text-xs text-gray-600 mt-1">
+                                                {member.alumniYear} • {member.village || 'N/A'}
+                                              </div>
+                                              <div className="text-xs text-gray-500 mt-1">📞 {member.phone}</div>
+                                            </div>
+                                            {currentAdmin?.isSuperAdmin ? (
+                                              <button
+                                                onClick={() => handleRemoveMember(member.id)}
+                                                className="text-red-600 hover:text-red-800 p-1"
+                                              >
+                                                <UserMinus size={16} />
+                                              </button>
+                                            ) : (
+                                              <button
+                                                disabled
+                                                title="Restricted"
+                                                className="text-gray-400 p-1 cursor-not-allowed"
+                                                style={{ pointerEvents: 'auto' }}
+                                              >
+                                                <UserMinus size={16} />
+                                              </button>
+                                            )}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
             {/* Admins Tab (Super Admin Only) */}
             {activeTab === 'admins' && currentAdmin?.isSuperAdmin && (
               <div>
@@ -754,57 +1325,71 @@ export default function AdminDashboard() {
                   Manage Administrators
                 </h2>
                 
-                {/* Add New Admin Form */}
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-8">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <UserPlus size={20} />
-                    Add New Admin
-                  </h3>
-                  <form onSubmit={handleAddAdmin} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <input
-                        type="text"
-                        placeholder="Admin Name"
-                        value={adminForm.name}
-                        onChange={(e) => setAdminForm({...adminForm, name: e.target.value})}
-                        className="input-field"
-                        required
-                      />
-                      <input
-                        type="email"
-                        placeholder="Email Address"
-                        value={adminForm.email}
-                        onChange={(e) => setAdminForm({...adminForm, email: e.target.value})}
-                        className="input-field"
-                        required
-                      />
-                      <div className="relative">
-                        <input
-                          type={showAdminPassword ? "text" : "password"}
-                          placeholder="Password (min 6 characters)"
-                          value={adminForm.password}
-                          onChange={(e) => setAdminForm({...adminForm, password: e.target.value})}
-                          className="input-field pr-10"
-                          minLength="6"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowAdminPassword(!showAdminPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                        >
-                          {showAdminPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {/* Add New Admin Form (Collapsible) */}
+                <div className="bg-orange-50 border border-orange-200 rounded-lg mb-8 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddAdminForm(!showAddAdminForm)}
+                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-orange-100 transition-colors"
+                  >
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <UserPlus size={20} />
+                      Add New Admin
+                    </h3>
+                    <span className="text-orange-700 font-medium">
+                      {showAddAdminForm ? '▼' : '►'}
+                    </span>
+                  </button>
+
+                  {showAddAdminForm && (
+                    <div className="px-6 pb-6 pt-2">
+                      <form onSubmit={handleAddAdmin} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <input
+                            type="text"
+                            placeholder="Admin Name"
+                            value={adminForm.name}
+                            onChange={(e) => setAdminForm({...adminForm, name: e.target.value})}
+                            className="input-field"
+                            required
+                          />
+                          <input
+                            type="email"
+                            placeholder="Email Address"
+                            value={adminForm.email}
+                            onChange={(e) => setAdminForm({...adminForm, email: e.target.value})}
+                            className="input-field"
+                            required
+                          />
+                          <div className="relative">
+                            <input
+                              type={showAdminPassword ? "text" : "password"}
+                              placeholder="Password (min 6 characters)"
+                              value={adminForm.password}
+                              onChange={(e) => setAdminForm({...adminForm, password: e.target.value})}
+                              className="input-field pr-10"
+                              minLength="6"
+                              required
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowAdminPassword(!showAdminPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            >
+                              {showAdminPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                          </div>
+                        </div>
+                        <button type="submit" className="btn-primary">
+                          <UserPlus size={18} className="inline mr-2" />
+                          Add Admin
                         </button>
-                      </div>
+                        <p className="text-sm text-gray-600 mt-2">
+                          💡 Share the email and password with the new admin securely
+                        </p>
+                      </form>
                     </div>
-                    <button type="submit" className="btn-primary">
-                      <UserPlus size={18} className="inline mr-2" />
-                      Add Admin
-                    </button>
-                    <p className="text-sm text-gray-600 mt-2">
-                      💡 Share the email and password with the new admin securely
-                    </p>
-                  </form>
+                  )}
                 </div>
 
                 {/* Admins List */}

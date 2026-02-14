@@ -258,7 +258,8 @@ export default function Login() {
                     value={formData.phone}
                     onChange={handleChange}
                     className="w-full px-4 py-2.5 bg-white/[0.08] border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-amber-400/50 focus:border-transparent outline-none transition-all"
-                    placeholder="123-456-7890"
+                    placeholder="000-000-0000"
+                    maxLength={10}
                     required
                   />
                 </div>

@@ -9,6 +9,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import Footer from '../components/Footer';
 import Reports from '../components/Reports';
 import BankingDetails from '../components/BankingDetails';
+import BulkOperations from '../components/BulkOperations';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -24,7 +25,13 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showAdminPassword, setShowAdminPassword] = useState(false);
-  
+
+  // Pagination states
+  const [donationPage, setDonationPage] = useState(1);
+  const [expensePage, setExpensePage] = useState(1);
+  const [userPage, setUserPage] = useState(1);
+  const itemsPerPage = 10;
+
   // Toast state
   const [toast, setToast] = useState(null);
   
@@ -160,7 +167,11 @@ export default function AdminDashboard() {
   const handleAddDonation = async (e) => {
     e.preventDefault();
     try {
-      await addDoc(collection(db, 'donations'), donationForm);
+      await addDoc(collection(db, 'donations'), {
+        ...donationForm,
+        createdBy: currentAdmin?.name || currentAdmin?.email || 'Unknown',
+        createdAt: new Date().toISOString()
+      });
       showToast('Donation recorded successfully!');
       setDonationForm({ date: '', donorName: '', amount: '', phone: '', alumniYear: '', village: '', notes: '' });
       fetchData();
@@ -173,7 +184,11 @@ export default function AdminDashboard() {
   const handleAddExpense = async (e) => {
     e.preventDefault();
     try {
-      await addDoc(collection(db, 'expenses'), expenseForm);
+      await addDoc(collection(db, 'expenses'), {
+        ...expenseForm,
+        createdBy: currentAdmin?.name || currentAdmin?.email || 'Unknown',
+        createdAt: new Date().toISOString()
+      });
       showToast('Expense recorded successfully!');
       setExpenseForm({ date: '', description: '', amount: '', category: '', notes: '' });
       fetchData();
@@ -383,6 +398,24 @@ export default function AdminDashboard() {
     }
   };
 
+  // Pagination helpers
+  const getPaginatedData = (data, page) => {
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return data.slice(startIndex, endIndex);
+  };
+
+  const getTotalPages = (data) => {
+    return Math.ceil(data.length / itemsPerPage);
+  };
+
+  const paginatedDonations = getPaginatedData(donations, donationPage);
+  const paginatedExpenses = getPaginatedData(expenses, expensePage);
+  const paginatedUsers = getPaginatedData(users, userPage);
+  const totalDonationPages = getTotalPages(donations);
+  const totalExpensePages = getTotalPages(expenses);
+  const totalUserPages = getTotalPages(users);
+
   // Helper function to format date in Indian format (dd/mm/yyyy)
   const formatIndianDate = (dateString) => {
     const date = new Date(dateString);
@@ -390,6 +423,16 @@ export default function AdminDashboard() {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
+  };
+
+  // Helper function to convert 24-hour time to 12-hour format with AM/PM
+  const formatTime12Hour = (time24) => {
+    if (!time24) return '';
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
   };
 
   if (loading) {
@@ -544,7 +587,7 @@ export default function AdminDashboard() {
         <div className="bg-white rounded-lg shadow-sm mb-6">
           <div className="border-b border-gray-200 overflow-x-auto">
             <nav className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 min-w-max" aria-label="Tabs">
-              {['meetings', 'donations', 'expenses', 'users', 'committee', ...(currentAdmin?.isSuperAdmin ? ['admins'] : []), 'reports', 'banking'].map((tab) => (
+              {['meetings', 'donations', 'expenses', 'users', 'committee', ...(currentAdmin?.isSuperAdmin ? ['admins'] : []), 'reports', 'banking', ...(currentAdmin?.isSuperAdmin ? ['operations'] : [])].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -576,7 +619,7 @@ export default function AdminDashboard() {
                       Add New Meeting
                     </h2>
                     <span className="text-purple-700 font-medium">
-                      {showMeetingForm ? '▼' : '►'}
+                      {showMeetingForm ? '▼' : '>'}
                     </span>
                   </button>
 
@@ -677,7 +720,7 @@ export default function AdminDashboard() {
                         📅 {formatIndianDate(meeting.date)}
                       </p>
                       <p className="text-sm text-gray-500 mb-2">
-                        🕐 {meeting.timeFrom || meeting.time} - {meeting.timeTo || ''}
+                        🕐 {formatTime12Hour(meeting.timeFrom || meeting.time)} - {formatTime12Hour(meeting.timeTo)}
                       </p>
                       {meeting.committeeIds && meeting.committeeIds.length > 0 && (
                         <p className="text-xs text-gray-600 mb-2">
@@ -715,7 +758,7 @@ export default function AdminDashboard() {
                       Record New Donation
                     </h2>
                     <span className="text-green-700 font-medium">
-                      {showDonationForm ? '▼' : '►'}
+                      {showDonationForm ? '▼' : '>'}
                     </span>
                   </button>
 
@@ -728,6 +771,7 @@ export default function AdminDashboard() {
                             value={donationForm.date}
                             onChange={(e) => setDonationForm({...donationForm, date: e.target.value})}
                             className="input-field"
+                            max={new Date().toISOString().split('T')[0]}
                             required
                           />
                           <input
@@ -755,6 +799,7 @@ export default function AdminDashboard() {
                             value={donationForm.phone}
                             onChange={(e) => setDonationForm({...donationForm, phone: e.target.value})}
                             className="input-field"
+                            maxLength={10}
                             required
                           />
                           <input
@@ -801,10 +846,11 @@ export default function AdminDashboard() {
                         <th className="pb-3 text-xs sm:text-sm">Year</th>
                         <th className="pb-3 text-xs sm:text-sm">Village</th>
                         <th className="pb-3 text-xs sm:text-sm">Notes</th>
+                        <th className="pb-3 text-xs sm:text-sm">Recorded By</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {donations.map((donation) => (
+                      {paginatedDonations.map((donation) => (
                         <tr key={donation.id} className="border-b border-gray-100">
                           <td className="py-3 text-xs sm:text-sm">{formatIndianDate(donation.date)}</td>
                           <td className="py-3 text-xs sm:text-sm">{donation.donorName}</td>
@@ -815,11 +861,40 @@ export default function AdminDashboard() {
                           <td className="py-3 text-xs sm:text-sm">{donation.alumniYear || '-'}</td>
                           <td className="py-3 text-xs sm:text-sm">{donation.village || '-'}</td>
                           <td className="py-3 text-xs sm:text-sm">{donation.notes || '-'}</td>
+                          <td className="py-3 text-xs sm:text-sm text-gray-500">{donation.createdBy || '-'}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
+
+                {/* Pagination Controls */}
+                {totalDonationPages > 1 && (
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+                    <p className="text-xs sm:text-sm text-gray-500">
+                      {((donationPage - 1) * itemsPerPage) + 1}–{Math.min(donationPage * itemsPerPage, donations.length)} of {donations.length}
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setDonationPage(p => Math.max(1, p - 1))}
+                        disabled={donationPage === 1}
+                        className="px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Prev
+                      </button>
+                      <span className="px-2 py-1.5 text-xs sm:text-sm font-medium text-gray-900">
+                        {donationPage} / {totalDonationPages}
+                      </span>
+                      <button
+                        onClick={() => setDonationPage(p => Math.min(totalDonationPages, p + 1))}
+                        disabled={donationPage === totalDonationPages}
+                        className="px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -838,7 +913,7 @@ export default function AdminDashboard() {
                       Record New Expense
                     </h2>
                     <span className="text-orange-700 font-medium">
-                      {showExpenseForm ? '▼' : '►'}
+                      {showExpenseForm ? '▼' : '>'}
                     </span>
                   </button>
 
@@ -851,6 +926,7 @@ export default function AdminDashboard() {
                             value={expenseForm.date}
                             onChange={(e) => setExpenseForm({...expenseForm, date: e.target.value})}
                             className="input-field"
+                            max={new Date().toISOString().split('T')[0]}
                             required
                           />
                           <input
@@ -910,10 +986,11 @@ export default function AdminDashboard() {
                         <th className="pb-3 text-xs sm:text-sm">Amount</th>
                         <th className="pb-3 text-xs sm:text-sm">Category</th>
                         <th className="pb-3 text-xs sm:text-sm">Notes</th>
+                        <th className="pb-3 text-xs sm:text-sm">Recorded By</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {expenses.map((expense) => (
+                      {paginatedExpenses.map((expense) => (
                         <tr key={expense.id} className="border-b border-gray-100">
                           <td className="py-3 text-xs sm:text-sm">{formatIndianDate(expense.date)}</td>
                           <td className="py-3 text-xs sm:text-sm">{expense.description}</td>
@@ -922,11 +999,40 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-3 text-xs sm:text-sm">{expense.category || '-'}</td>
                           <td className="py-3 text-xs sm:text-sm">{expense.notes || '-'}</td>
+                          <td className="py-3 text-xs sm:text-sm text-gray-500">{expense.createdBy || '-'}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
+
+                {/* Pagination Controls */}
+                {totalExpensePages > 1 && (
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+                    <p className="text-xs sm:text-sm text-gray-500">
+                      {((expensePage - 1) * itemsPerPage) + 1}–{Math.min(expensePage * itemsPerPage, expenses.length)} of {expenses.length}
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setExpensePage(p => Math.max(1, p - 1))}
+                        disabled={expensePage === 1}
+                        className="px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Prev
+                      </button>
+                      <span className="px-2 py-1.5 text-xs sm:text-sm font-medium text-gray-900">
+                        {expensePage} / {totalExpensePages}
+                      </span>
+                      <button
+                        onClick={() => setExpensePage(p => Math.min(totalExpensePages, p + 1))}
+                        disabled={expensePage === totalExpensePages}
+                        className="px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -945,7 +1051,7 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {users.map((user) => (
+                      {paginatedUsers.map((user) => (
                         <tr key={user.id} className="border-b border-gray-100">
                           <td className="py-3 text-xs sm:text-sm">{user.firstName} {user.lastName}</td>
                           <td className="py-3 text-xs sm:text-sm">{user.phone}</td>
@@ -956,6 +1062,34 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 </div>
+
+                {/* Pagination Controls */}
+                {totalUserPages > 1 && (
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+                    <p className="text-xs sm:text-sm text-gray-500">
+                      {((userPage - 1) * itemsPerPage) + 1}–{Math.min(userPage * itemsPerPage, users.length)} of {users.length}
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setUserPage(p => Math.max(1, p - 1))}
+                        disabled={userPage === 1}
+                        className="px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Prev
+                      </button>
+                      <span className="px-2 py-1.5 text-xs sm:text-sm font-medium text-gray-900">
+                        {userPage} / {totalUserPages}
+                      </span>
+                      <button
+                        onClick={() => setUserPage(p => Math.min(totalUserPages, p + 1))}
+                        disabled={userPage === totalUserPages}
+                        className="px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -975,7 +1109,7 @@ export default function AdminDashboard() {
                         Create New Committee
                       </h3>
                       <span className="text-blue-700 font-medium">
-                        {showCreateCommitteeForm ? '▼' : '►'}
+                        {showCreateCommitteeForm ? '▼' : '>'}
                       </span>
                     </button>
 
@@ -1085,7 +1219,7 @@ export default function AdminDashboard() {
                                   Add Member
                                 </h4>
                                 <span className="text-green-700 font-medium">
-                                  {showAddMemberForm ? '▼' : '►'}
+                                  {showAddMemberForm ? '▼' : '>'}
                                 </span>
                               </button>
 
@@ -1243,7 +1377,7 @@ export default function AdminDashboard() {
                                     <Trash2 size={16} />
                                   </button>
                                 )}
-                                <span className="text-gray-500 text-sm">{isExpanded ? '▼' : '►'}</span>
+                                <span className="text-gray-500 text-sm">{isExpanded ? '▼' : '>'}</span>
                               </div>
                             </button>
 
@@ -1262,7 +1396,7 @@ export default function AdminDashboard() {
                                       Add Member
                                     </h4>
                                     <span className="text-green-700 font-medium">
-                                      {showAddMemberForm ? '▼' : '►'}
+                                      {showAddMemberForm ? '▼' : '>'}
                                     </span>
                                   </button>
 
@@ -1385,7 +1519,7 @@ export default function AdminDashboard() {
                       Add New Admin
                     </h3>
                     <span className="text-orange-700 font-medium">
-                      {showAddAdminForm ? '▼' : '►'}
+                      {showAddAdminForm ? '▼' : '>'}
                     </span>
                   </button>
 
@@ -1495,6 +1629,11 @@ export default function AdminDashboard() {
             {/* Banking Tab */}
             {activeTab === 'banking' && (
               <BankingDetails />
+            )}
+
+            {/* Operations Tab (Super Admin Only) */}
+            {activeTab === 'operations' && currentAdmin?.isSuperAdmin && (
+              <BulkOperations />
             )}
           </div>
         </div>

@@ -213,7 +213,7 @@ export default function Dashboard() {
                     navigate('/admin');
                     setMobileMenuOpen(false);
                   }}
-                  className="flex items-center gap-3 w-full px-4 py-3 text-left text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                  className="flex items-center gap-2 w-full px-4 py-3 text-left text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
                 >
                   <User size={20} />
                   <span className="font-medium">Admin Panel</span>
@@ -224,7 +224,7 @@ export default function Dashboard() {
                   handleLogout();
                   setMobileMenuOpen(false);
                 }}
-                className="flex items-center gap-3 w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="flex items-center gap-2 w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
               >
                 <LogOut size={20} />
                 <span className="font-medium">Logout</span>
@@ -237,8 +237,8 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* User Info Card */}
         <div className="card mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-full bg-primary-700 flex items-center justify-center text-white font-bold text-lg">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-12 h-12 rounded-full bg-primary-700 flex items-center justify-center text-white text-lg">
               {(currentUser?.firstName?.[0] || '').toUpperCase()}{(currentUser?.lastName?.[0] || '').toUpperCase()}
             </div>
             <div className="flex-1">
@@ -272,45 +272,45 @@ export default function Dashboard() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="card">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-2 mb-2">
               <User size={20} className="text-blue-600" />
-              <h3 className="font-semibold text-gray-700">Total Users</h3>
+              <h3 className="text-gray-700">Total Users</h3>
             </div>
-            <p className="text-3xl font-bold text-blue-600">{users.length}</p>
-            <p className="text-sm text-gray-500 mt-1">Registered alumni</p>
+            <p className="text-xl text-blue-600">{users.length}</p>
+            <p className="text-sm text-gray-400 mt-1">Registered alumni</p>
           </div>
 
           <div className="card">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-2 mb-2">
               <IndianRupee size={20} className="text-green-600" />
-              <h3 className="font-semibold text-gray-700">Total Donations</h3>
+              <h3 className="text-gray-700">Total Donations</h3>
             </div>
-            <p className="text-3xl font-bold text-green-600">
+            <p className="text-xl text-green-600">
               ₹{totalDonations.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
-            <p className="text-sm text-gray-500 mt-1">{donations.length} contributions</p>
+            <p className="text-sm text-gray-400 mt-1">{donations.length} contributions</p>
           </div>
 
           <div className="card">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-2 mb-2">
               <FileText size={20} className="text-orange-600" />
-              <h3 className="font-semibold text-gray-700">Total Expenses</h3>
+              <h3 className="text-gray-700">Total Expenses</h3>
             </div>
-            <p className="text-3xl font-bold text-orange-600">
+            <p className="text-xl text-orange-600">
               ₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
-            <p className="text-sm text-gray-500 mt-1">{expenses.length} transactions</p>
+            <p className="text-sm text-gray-400 mt-1">{expenses.length} transactions</p>
           </div>
 
           <div className="card">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-2 mb-2">
               <IndianRupee size={20} className="text-teal-600" />
-              <h3 className="font-semibold text-gray-700">Remaining Cash</h3>
+              <h3 className="text-gray-700">Remaining Cash</h3>
             </div>
-            <p className={`text-3xl font-bold ${totalDonations - totalExpenses >= 0 ? 'text-teal-600' : 'text-red-600'}`}>
+            <p className={`text-xl ${totalDonations - totalExpenses >= 0 ? 'text-teal-600' : 'text-red-600'}`}>
               ₹{(totalDonations - totalExpenses).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
-            <p className="text-sm text-gray-500 mt-1">Available balance</p>
+            <p className="text-sm text-gray-400 mt-1">Available balance</p>
           </div>
         </div>
 

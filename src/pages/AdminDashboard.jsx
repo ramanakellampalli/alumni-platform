@@ -542,7 +542,7 @@ export default function AdminDashboard() {
                 >
                   👥
                 </div>
-                <p className="text-2xl font-bold text-primary-600">{users.length}</p>
+                <p className="text-xl text-primary-600">{users.length}</p>
               </div>
               <div className="flex items-center gap-2.5">
                 <div
@@ -551,7 +551,7 @@ export default function AdminDashboard() {
                 >
                   📅
                 </div>
-                <p className="text-2xl font-bold text-blue-600">{meetings.length}</p>
+                <p className="text-xl text-blue-600">{meetings.length}</p>
               </div>
             </div>
           </div>
@@ -559,25 +559,25 @@ export default function AdminDashboard() {
           <div className="card">
             <div className="flex items-center gap-2 mb-2">
               <IndianRupee size={20} className="text-green-600" />
-              <h3 className="font-semibold text-gray-700">Donations</h3>
+              <h3 className="text-gray-700">Donations</h3>
             </div>
-            <p className="text-3xl font-bold text-green-600">₹{totalDonations.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            <p className="text-xl text-green-600">₹{totalDonations.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           </div>
 
           <div className="card">
             <div className="flex items-center gap-2 mb-2">
               <FileText size={20} className="text-orange-600" />
-              <h3 className="font-semibold text-gray-700">Expenses</h3>
+              <h3 className="text-gray-700">Expenses</h3>
             </div>
-            <p className="text-3xl font-bold text-orange-600">₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            <p className="text-xl text-orange-600">₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           </div>
 
           <div className="card">
             <div className="flex items-center gap-2 mb-2">
               <IndianRupee size={20} className="text-teal-600" />
-              <h3 className="font-semibold text-gray-700">Remaining Cash</h3>
+              <h3 className="text-gray-700">Remaining Cash</h3>
             </div>
-            <p className={`text-3xl font-bold ${totalDonations - totalExpenses >= 0 ? 'text-teal-600' : 'text-red-600'}`}>
+            <p className={`text-xl ${totalDonations - totalExpenses >= 0 ? 'text-teal-600' : 'text-red-600'}`}>
               ₹{(totalDonations - totalExpenses).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
           </div>

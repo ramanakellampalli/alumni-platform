@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../config/firebase';
 import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc, updateDoc, where } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { LogOut, Plus, Calendar, IndianRupee, FileText, Users, Trash2, User, Shield, UserPlus, Menu, X, Eye, EyeOff, Briefcase, UserMinus } from 'lucide-react';
+import { Plus, Calendar, IndianRupee, FileText, Users, Trash2, User, Shield, UserPlus, Eye, EyeOff, Briefcase, UserMinus } from 'lucide-react';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
 import Footer from '../components/Footer';
 import Reports from '../components/Reports';
 import BankingDetails from '../components/BankingDetails';
 import BulkOperations from '../components/BulkOperations';
+import Header from '../components/Header';
+import StatsOverview from '../components/StatsOverview';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -466,122 +468,21 @@ export default function AdminDashboard() {
         message={confirmModal.message}
       />
 
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-primary-900">Admin Dashboard</h1>
-              <p className="text-xs sm:text-sm text-gray-600">Platform Management</p>
-            </div>
-            
-            {/* Desktop Menu */}
-            <div className="hidden md:flex items-center gap-4">
-              <button
-                onClick={() => navigate('/dashboard')}
-                className="flex items-center gap-2 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
-              >
-                <User size={18} />
-                User Dashboard
-              </button>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 px-4 py-2"
-              >
-                <LogOut size={18} />
-                Logout
-              </button>
-            </div>
-
-            {/* Mobile Hamburger */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-
-          {/* Mobile Menu Dropdown */}
-          {mobileMenuOpen && (
-            <div className="md:hidden mt-4 py-4 border-t border-gray-200 space-y-2">
-              <button
-                onClick={() => {
-                  navigate('/dashboard');
-                  setMobileMenuOpen(false);
-                }}
-                className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <User size={20} />
-                <span className="font-medium">User Dashboard</span>
-              </button>
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setMobileMenuOpen(false);
-                }}
-                className="flex items-center gap-3 w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              >
-                <LogOut size={20} />
-                <span className="font-medium">Logout</span>
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
+      <Header
+        user={currentAdmin}
+        userType="admin"
+        onLogout={handleLogout}
+        onNavigate={navigate}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="card">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2.5">
-                <div
-                  className="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center text-lg cursor-help"
-                  title="Total Users"
-                >
-                  👥
-                </div>
-                <p className="text-xl text-primary-600">{users.length}</p>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <div
-                  className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-lg cursor-help"
-                  title="Meetings"
-                >
-                  📅
-                </div>
-                <p className="text-xl text-blue-600">{meetings.length}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center gap-2 mb-2">
-              <IndianRupee size={20} className="text-green-600" />
-              <h3 className="text-gray-700">Donations</h3>
-            </div>
-            <p className="text-xl text-green-600">₹{totalDonations.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center gap-2 mb-2">
-              <FileText size={20} className="text-orange-600" />
-              <h3 className="text-gray-700">Expenses</h3>
-            </div>
-            <p className="text-xl text-orange-600">₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center gap-2 mb-2">
-              <IndianRupee size={20} className="text-teal-600" />
-              <h3 className="text-gray-700">Remaining Cash</h3>
-            </div>
-            <p className={`text-xl ${totalDonations - totalExpenses >= 0 ? 'text-teal-600' : 'text-red-600'}`}>
-              ₹{(totalDonations - totalExpenses).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-          </div>
-        </div>
+        <StatsOverview
+          donations={donations}
+          expenses={expenses}
+          users={users}
+        />
 
         {/* Tabs */}
         <div className="bg-white rounded-lg shadow-sm mb-6">

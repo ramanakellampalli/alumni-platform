@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../config/firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { LogOut, Calendar, IndianRupee, FileText, User, Video, Menu, X, Briefcase } from 'lucide-react';
+import { Calendar, IndianRupee, FileText, Video, User, Briefcase } from 'lucide-react';
 import Footer from '../components/Footer';
 import Reports from '../components/Reports';
 import BankingDetails from '../components/BankingDetails';
+import Header from '../components/Header';
+import StatsOverview from '../components/StatsOverview';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -77,9 +79,6 @@ export default function Dashboard() {
     logout();
     navigate('/login');
   };
-
-  const totalDonations = donations.reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
-  const totalExpenses = expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
 
   // Helper function to format date in Indian format (dd/mm/yyyy)
   const formatIndianDate = (dateString) => {
@@ -169,150 +168,22 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-xl sm:text-2xl font-bold text-primary-900">Alumni Platform</h1>
-            
-            {/* Desktop Menu */}
-            <div className="hidden md:flex items-center gap-4">
-              {currentUser?.isAdmin && (
-                <button
-                  onClick={() => navigate('/admin')}
-                  className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
-                >
-                  <User size={20} />
-                  Admin Panel
-                </button>
-              )}
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
-              >
-                <LogOut size={20} />
-                Logout
-              </button>
-            </div>
-
-            {/* Mobile Hamburger */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-
-          {/* Mobile Menu Dropdown */}
-          {mobileMenuOpen && (
-            <div className="md:hidden mt-4 py-4 border-t border-gray-200 space-y-2">
-              {currentUser?.isAdmin && (
-                <button
-                  onClick={() => {
-                    navigate('/admin');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex items-center gap-2 w-full px-4 py-3 text-left text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                >
-                  <User size={20} />
-                  <span className="font-medium">Admin Panel</span>
-                </button>
-              )}
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setMobileMenuOpen(false);
-                }}
-                className="flex items-center gap-2 w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              >
-                <LogOut size={20} />
-                <span className="font-medium">Logout</span>
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
+      <Header
+        user={currentUser}
+        userType="user"
+        userCommittee={userCommittee}
+        onLogout={handleLogout}
+        onNavigate={navigate}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* User Info Card */}
-        <div className="card mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-12 h-12 rounded-full bg-primary-700 flex items-center justify-center text-white text-lg">
-              {(currentUser?.firstName?.[0] || '').toUpperCase()}{(currentUser?.lastName?.[0] || '').toUpperCase()}
-            </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-semibold">
-                Welcome, {currentUser?.firstName || 'Alumni'}!
-              </h2>
-              <p className="text-gray-600 text-sm">
-                {currentUser?.village && `${currentUser.village} • `}
-                Class of {currentUser?.alumniYear}
-              </p>
-            </div>
-            {userCommittee && (
-              <div className="hidden sm:block">
-                <div className="flex items-center gap-2 bg-primary-50 border border-primary-200 px-3 py-2 rounded-lg">
-                  <Briefcase size={16} className="text-primary-600" />
-                  <span className="text-sm font-medium text-primary-900">{userCommittee.name}</span>
-                </div>
-              </div>
-            )}
-          </div>
-          {userCommittee && (
-            <div className="sm:hidden mt-2">
-              <div className="flex items-center gap-2 bg-primary-50 border border-primary-200 px-3 py-2 rounded-lg w-fit">
-                <Briefcase size={16} className="text-primary-600" />
-                <span className="text-sm font-medium text-primary-900">{userCommittee.name}</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="card">
-            <div className="flex items-center gap-2 mb-2">
-              <User size={20} className="text-blue-600" />
-              <h3 className="text-gray-700">Total Users</h3>
-            </div>
-            <p className="text-xl text-blue-600">{users.length}</p>
-            <p className="text-sm text-gray-400 mt-1">Registered alumni</p>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center gap-2 mb-2">
-              <IndianRupee size={20} className="text-green-600" />
-              <h3 className="text-gray-700">Total Donations</h3>
-            </div>
-            <p className="text-xl text-green-600">
-              ₹{totalDonations.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-            <p className="text-sm text-gray-400 mt-1">{donations.length} contributions</p>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center gap-2 mb-2">
-              <FileText size={20} className="text-orange-600" />
-              <h3 className="text-gray-700">Total Expenses</h3>
-            </div>
-            <p className="text-xl text-orange-600">
-              ₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-            <p className="text-sm text-gray-400 mt-1">{expenses.length} transactions</p>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center gap-2 mb-2">
-              <IndianRupee size={20} className="text-teal-600" />
-              <h3 className="text-gray-700">Remaining Cash</h3>
-            </div>
-            <p className={`text-xl ${totalDonations - totalExpenses >= 0 ? 'text-teal-600' : 'text-red-600'}`}>
-              ₹{(totalDonations - totalExpenses).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-            <p className="text-sm text-gray-400 mt-1">Available balance</p>
-          </div>
-        </div>
+        <StatsOverview
+          donations={donations}
+          expenses={expenses}
+          users={users}
+        />
 
         {/* Tabs */}
         <div className="bg-white rounded-lg shadow-sm mb-6">

@@ -214,8 +214,9 @@ export default function Dashboard() {
           {meetings.length === 0 ? (
             <p className="text-gray-500 text-center py-8">No upcoming meetings scheduled</p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {meetings.map((meeting) => {
+            <div className="max-h-[600px] overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pr-2">
+                {meetings.map((meeting) => {
                 const isActive = isMeetingActive(meeting);
                 const isPast = isMeetingPast(meeting);
 
@@ -300,6 +301,7 @@ export default function Dashboard() {
                   </div>
                 );
               })}
+              </div>
             </div>
           )}
               </div>

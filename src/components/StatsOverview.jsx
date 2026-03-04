@@ -9,9 +9,9 @@ export default function StatsOverview({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
       {/* Available Balance Card */}
-      <div className="card" style={{ backgroundColor: 'rgba(46, 199, 181, 0.18)' }}>
+      <div className="card">
         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Available Balance</p>
-        <p className={`text-xl mb-4 ${totalDonations - totalExpenses >= 0 ? 'text-gray-900' : 'text-red-600'}`}>
+        <p className={`text-xl font-semibold mb-4 ${totalDonations - totalExpenses >= 0 ? 'text-gray-900' : 'text-red-600'}`}>
           ₹{(totalDonations - totalExpenses).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
         </p>
         <div className="space-y-2">
@@ -31,7 +31,7 @@ export default function StatsOverview({
       </div>
 
       {/* List Group Card */}
-      <div className="card p-0 overflow-hidden" style={{ backgroundColor: 'rgba(186, 199, 46, 0.22)' }}>
+      <div className="card p-0 overflow-hidden">
         {/* Donations */}
         <div className="p-2 border-b border-gray-200">
           <div className="p-1 flex items-center justify-between">
@@ -39,7 +39,7 @@ export default function StatsOverview({
               <p className="text-sm font-medium text-gray-900">Total Donations</p>
               <p className="text-xs text-gray-600 mt-0.5">{donations.length} entries</p>
             </div>
-            <p>
+            <p className="font-semibold">
               ₹{totalDonations.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
             </p>
           </div>
@@ -52,7 +52,7 @@ export default function StatsOverview({
               <p className="text-sm font-medium text-gray-900">Total Expenses</p>
               <p className="text-xs text-gray-600 mt-0.5">{expenses.length} entries</p>
             </div>
-            <p>
+            <p className="font-semibold">
               ₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
             </p>
           </div>
@@ -65,7 +65,7 @@ export default function StatsOverview({
               <p className="text-sm font-medium text-gray-900">Registered Alumni</p>
               <p className="text-xs text-gray-600 mt-0.5">Total users</p>
             </div>
-            <p>{users.length}</p>
+            <p className="font-semibold">{users.length}</p>
           </div>
         </div>
       </div>

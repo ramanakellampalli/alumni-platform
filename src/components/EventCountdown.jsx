@@ -5,7 +5,7 @@ const EVENT_END = new Date('2026-05-10T23:59:59');
 
 export default function EventCountdown() {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const [status, setStatus] = useState('upcoming'); // 'upcoming' | 'live' | 'ended'
+  const [status, setStatus] = useState('upcoming');
 
   useEffect(() => {
     const calculate = () => {
@@ -27,56 +27,75 @@ export default function EventCountdown() {
 
   if (status === 'ended') return null;
 
-  const CountBox = ({ value, label }) => (
+  const Unit = ({ value, label }) => (
     <div className="flex flex-col items-center">
-      <div className="bg-white/[0.08] border border-white/10 rounded-lg w-12 h-12 flex items-center justify-center">
-        <span className="text-lg font-bold text-amber-400 tabular-nums">
+      <div
+        className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center"
+        style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.15)' }}
+      >
+        <span className="text-base sm:text-xl font-black text-white tabular-nums leading-none">
           {String(value).padStart(2, '0')}
         </span>
       </div>
-      <span className="text-xs text-gray-500 mt-1 uppercase tracking-wide">{label}</span>
+      <span className="text-[9px] text-white/50 uppercase tracking-wider mt-1">{label}</span>
     </div>
   );
 
   return (
-    <div className="relative rounded-xl mb-6 overflow-hidden bg-gray-900/80 backdrop-blur-xl border border-white/10">
-      <div className="relative px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-        {/* Left — Event Info */}
-        <div className="text-center sm:text-left">
-          <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
-            <span className="text-lg">🎉</span>
-            <span className="text-white font-semibold text-base tracking-tight">Annual Alumni Event</span>
+    <div
+      className="relative rounded-2xl mb-6 overflow-hidden"
+      style={{ background: 'linear-gradient(135deg, #92400e 0%, #b45309 35%, #d97706 65%, #92400e 100%)' }}
+    >
+      {/* Decorative orb top-right */}
+      <div
+        className="absolute -top-6 -right-6 w-28 h-28 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.12), transparent 70%)' }}
+      />
+      {/* Decorative orb bottom-left */}
+      <div
+        className="absolute -bottom-8 -left-4 w-36 h-36 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%)' }}
+      />
+
+      <div className="relative px-5 py-4 flex items-center justify-between gap-4">
+        {/* Left — Event info */}
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="text-base">🎉</span>
+            <span className="text-white/60 text-xs font-semibold uppercase tracking-[0.15em]">
+              75th Anniversary
+            </span>
             {status === 'live' && (
-              <span className="animate-pulse bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+              <span className="animate-pulse bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full ml-1">
                 LIVE
               </span>
             )}
           </div>
-          <p className="text-gray-400 text-sm">
-            {status === 'live'
-              ? 'The event is happening right now! 🎊'
-              : 'May 9 – 10, 2026  •  Mark your calendar!'}
+          <p className="text-white font-bold text-sm sm:text-lg leading-tight">
+            Alumni Reunion
           </p>
-          <div className="flex items-center justify-center sm:justify-start gap-2 mt-2">
-            <span className="text-xs bg-amber-400/10 text-amber-400 border border-amber-400/20 px-2 py-0.5 rounded-full">📅 Day 1 · May 9</span>
-            <span className="text-xs bg-amber-400/10 text-amber-400 border border-amber-400/20 px-2 py-0.5 rounded-full">📅 Day 2 · May 10</span>
-          </div>
+          <p className="text-white/60 text-[10px] sm:text-xs mt-0.5">
+            ZPHS Valaparla · May 9–10
+          </p>
         </div>
 
         {/* Right — Countdown */}
         {status === 'upcoming' && (
-          <div className="flex items-end gap-2">
-            <CountBox value={timeLeft.days} label="Days" />
-            <span className="text-white/30 text-lg font-bold mb-4">:</span>
-            <CountBox value={timeLeft.hours} label="Hrs" />
-            <span className="text-white/30 text-lg font-bold mb-4">:</span>
-            <CountBox value={timeLeft.minutes} label="Mins" />
-            <span className="text-white/30 text-lg font-bold mb-4">:</span>
-            <CountBox value={timeLeft.seconds} label="Secs" />
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Unit value={timeLeft.days} label="Days" />
+            <span className="text-white/25 text-sm font-light mb-3">:</span>
+            <Unit value={timeLeft.hours} label="Hrs" />
+            <span className="text-white/25 text-sm font-light mb-3">:</span>
+            <Unit value={timeLeft.minutes} label="Min" />
+            <span className="text-white/25 text-sm font-light mb-3">:</span>
+            <Unit value={timeLeft.seconds} label="Sec" />
           </div>
         )}
-      </div>
 
+        {status === 'live' && (
+          <p className="text-white/80 text-sm shrink-0">Happening now 🎊</p>
+        )}
+      </div>
     </div>
   );
 }

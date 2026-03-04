@@ -86,6 +86,7 @@ export default function AdminDashboard() {
   const [showDonationForm, setShowDonationForm] = useState(false);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [showMeetingForm, setShowMeetingForm] = useState(false);
+  const [accommodationRequests, setAccommodationRequests] = useState([]);
 
   useEffect(() => {
     // Check if admin is logged in via Firebase Auth
@@ -139,6 +140,10 @@ export default function AdminDashboard() {
       if (committeesData.length > 0 && !selectedCommittee) {
         setSelectedCommittee(committeesData[0]);
       }
+
+      // Fetch accommodation requests
+      const accomSnapshot = await getDocs(collection(db, 'accommodation_requests'));
+      setAccommodationRequests(accomSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -449,7 +454,7 @@ export default function AdminDashboard() {
   const totalExpenses = expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Toast Notification */}
       {toast && (
         <Toast
@@ -477,7 +482,7 @@ export default function AdminDashboard() {
         setMobileMenuOpen={setMobileMenuOpen}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <StatsOverview
           donations={donations}
           expenses={expenses}
@@ -488,7 +493,7 @@ export default function AdminDashboard() {
         <div className="bg-white rounded-lg shadow-sm mb-6">
           <div className="border-b border-gray-200 overflow-x-auto">
             <nav className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 min-w-max" aria-label="Tabs">
-              {['meetings', 'donations', 'expenses', 'users', 'committee', ...(currentAdmin?.isSuperAdmin ? ['admins'] : []), 'reports', 'banking', ...(currentAdmin?.isSuperAdmin ? ['operations'] : [])].map((tab) => (
+              {['meetings', 'donations', 'expenses', 'users', 'committee', ...(currentAdmin?.isSuperAdmin ? ['admins'] : []), 'reports', 'banking', 'operations'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -1534,9 +1539,13 @@ export default function AdminDashboard() {
               <BankingDetails />
             )}
 
-            {/* Operations Tab (Super Admin Only) */}
-            {activeTab === 'operations' && currentAdmin?.isSuperAdmin && (
-              <BulkOperations />
+            {/* Operations Tab */}
+            {activeTab === 'operations' && (
+              <BulkOperations
+                accommodationRequests={accommodationRequests}
+                currentAdmin={currentAdmin}
+                onUpdate={fetchData}
+              />
             )}
           </div>
         </div>

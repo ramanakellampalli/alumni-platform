@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../config/firebase';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, where } from 'firebase/firestore';
 import { Calendar, IndianRupee, FileText, Video, User, Briefcase } from 'lucide-react';
 import Footer from '../components/Footer';
 import Reports from '../components/Reports';
 import BankingDetails from '../components/BankingDetails';
 import Header from '../components/Header';
 import StatsOverview from '../components/StatsOverview';
+import AccommodationRequest from '../components/AccommodationRequest';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('meetings');
+  const [accommodationRequest, setAccommodationRequest] = useState(null);
   
   // Pagination states
   const [donationPage, setDonationPage] = useState(1);
@@ -67,6 +69,21 @@ export default function Dashboard() {
       if (currentUser?.committeeId) {
         const committee = committeesData.find(c => c.id === currentUser.committeeId);
         setUserCommittee(committee || null);
+      }
+
+      // Fetch accommodation request for this user
+      try {
+        const accomQuery = query(
+          collection(db, 'accommodation_requests'),
+          where('userId', '==', currentUser.id)
+        );
+        const accomSnapshot = await getDocs(accomQuery);
+        if (!accomSnapshot.empty) {
+          const docSnap = accomSnapshot.docs[0];
+          setAccommodationRequest({ id: docSnap.id, ...docSnap.data() });
+        }
+      } catch (accomError) {
+        console.warn('Accommodation requests: check Firestore rules.', accomError.message);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -167,7 +184,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header
         user={currentUser}
         userType="user"
@@ -178,7 +195,13 @@ export default function Dashboard() {
         setMobileMenuOpen={setMobileMenuOpen}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <AccommodationRequest
+          currentUser={currentUser}
+          request={accommodationRequest}
+          onRequestSubmitted={(newRequest) => setAccommodationRequest(newRequest)}
+        />
+
         <StatsOverview
           donations={donations}
           expenses={expenses}

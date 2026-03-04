@@ -32,9 +32,14 @@ export default function Register() {
     setLoading(true);
 
     try {
+      const toTitleCase = str => str.trim().split(' ')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+
       // Add user to Firestore
       await addDoc(collection(db, 'users'), {
         ...formData,
+        firstName: toTitleCase(formData.firstName),
+        lastName: toTitleCase(formData.lastName),
         isAdmin: false,
         createdAt: new Date().toISOString()
       });

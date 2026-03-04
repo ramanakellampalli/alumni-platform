@@ -37,11 +37,11 @@ function CopyField({ label, value }) {
 
 export default function BankingDetails() {
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
         {/* QR Code Card */}
-        <div className="card flex flex-col items-center text-center">
+        <div className="card flex flex-col items-start">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4">Scan to Pay (UPI)</p>
           <div className="p-3 bg-white border border-gray-200 rounded-xl mb-3">
             <QRCodeSVG
@@ -67,7 +67,7 @@ export default function BankingDetails() {
         </div>
       </div>
 
-      <p className="text-center text-xs text-gray-400 mt-6">
+      <p className="text-xs text-gray-400 mt-6">
         After transferring, please share your transaction reference with the treasurer.
       </p>
     </div>

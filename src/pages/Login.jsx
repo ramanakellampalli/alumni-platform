@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { LogIn, UserPlus } from 'lucide-react';
 import Footer from '../components/Footer';
+import EventCountdown from '../components/EventCountdown';
 
 function AnimatedCounter({ target, duration = 2000 }) {
   const [count, setCount] = useState(0);
@@ -143,7 +144,7 @@ export default function Login() {
       <div className="flex-grow flex flex-col lg:flex-row">
 
       {/* ===== LHS: Celebration showcase (hidden on mobile, full left panel on desktop) ===== */}
-      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 flex-col relative overflow-hidden">
         {/* Orbs — LHS only on desktop */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="orb" style={{ width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(14,165,233,0.4), transparent 70%)', top: '-10%', left: '-10%', animationDuration: '14s' }} />
@@ -154,8 +155,13 @@ export default function Login() {
         <Sparkles />
         <Confetti />
 
+        {/* EventCountdown at top of LHS */}
+        <div className="relative z-10 p-6 pb-0">
+          <EventCountdown />
+        </div>
+
         {/* Hero content */}
-        <div className="relative z-10 text-center px-12">
+        <div className="flex-1 flex flex-col items-center justify-center relative z-10 text-center px-12">
           <div className="animate-rise" style={{ animationDelay: '0.1s' }}>
             <span className="text-shimmer glow-text text-9xl xl:text-[10rem] font-black tracking-tight leading-none">
               <AnimatedCounter target={75} duration={2200} />
@@ -192,8 +198,13 @@ export default function Login() {
           <Confetti />
         </div>
 
+        {/* Mobile: EventCountdown full-width above form */}
+        <div className="lg:hidden px-6 pt-6 relative z-10">
+          <EventCountdown />
+        </div>
+
         {/* Form area */}
-        <div className="flex-grow flex items-center justify-center px-6 pt-6 pb-10 lg:py-12 relative z-10">
+        <div className="flex-grow flex items-center justify-center px-6 pt-2 pb-10 lg:py-12 relative z-10">
           <div className="max-w-md w-full">
 
             {/* Mobile-only: hero above card */}

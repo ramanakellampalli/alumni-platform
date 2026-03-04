@@ -72,14 +72,18 @@ export default function Dashboard() {
       }
 
       // Fetch accommodation request for this user
-      const accomQuery = query(
-        collection(db, 'accommodation_requests'),
-        where('userId', '==', currentUser.id)
-      );
-      const accomSnapshot = await getDocs(accomQuery);
-      if (!accomSnapshot.empty) {
-        const doc = accomSnapshot.docs[0];
-        setAccommodationRequest({ id: doc.id, ...doc.data() });
+      try {
+        const accomQuery = query(
+          collection(db, 'accommodation_requests'),
+          where('userId', '==', currentUser.id)
+        );
+        const accomSnapshot = await getDocs(accomQuery);
+        if (!accomSnapshot.empty) {
+          const docSnap = accomSnapshot.docs[0];
+          setAccommodationRequest({ id: docSnap.id, ...docSnap.data() });
+        }
+      } catch (accomError) {
+        console.warn('Accommodation requests: check Firestore rules.', accomError.message);
       }
     } catch (error) {
       console.error('Error fetching data:', error);

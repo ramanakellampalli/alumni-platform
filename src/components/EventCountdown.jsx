@@ -30,10 +30,10 @@ export default function EventCountdown() {
   const Unit = ({ value, label }) => (
     <div className="flex flex-col items-center">
       <div
-        className="w-11 h-11 rounded-xl flex items-center justify-center"
+        className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center"
         style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.15)' }}
       >
-        <span className="text-xl font-black text-white tabular-nums leading-none">
+        <span className="text-base sm:text-xl font-black text-white tabular-nums leading-none">
           {String(value).padStart(2, '0')}
         </span>
       </div>
@@ -71,10 +71,10 @@ export default function EventCountdown() {
               </span>
             )}
           </div>
-          <p className="text-white font-bold text-lg leading-tight">
+          <p className="text-white font-bold text-sm sm:text-lg leading-tight">
             Alumni Reunion
           </p>
-          <p className="text-white/60 text-xs mt-0.5">
+          <p className="text-white/60 text-[10px] sm:text-xs mt-0.5">
             ZPHS Valaparla · May 9–10
           </p>
         </div>

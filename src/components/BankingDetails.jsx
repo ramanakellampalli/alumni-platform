@@ -67,7 +67,7 @@ export default function BankingDetails() {
         </div>
       </div>
 
-      <p className="text-xs text-gray-400 mt-6">
+      <p className="text-xs text-gray-400 mt-6 text-center">
         After transferring, please share your transaction reference with the treasurer.
       </p>
     </div>

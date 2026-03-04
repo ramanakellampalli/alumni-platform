@@ -36,10 +36,9 @@ export default function BulkOperations({ accommodationRequests = [], currentAdmi
     setSubmitting(false);
     try {
       await updateDoc(doc(db, 'accommodation_requests', approveModal.id), updatedFields);
-      onUpdate();
     } catch (err) {
       console.error('Error approving request:', err);
-      onUpdate(); // refetch to restore correct state on error
+      onUpdate(); // refetch only on error to restore correct state
     }
   };
 
@@ -53,10 +52,9 @@ export default function BulkOperations({ accommodationRequests = [], currentAdmi
     setLocalRequests(prev => prev.map(r => r.id === request.id ? { ...r, ...updatedFields } : r));
     try {
       await updateDoc(doc(db, 'accommodation_requests', request.id), updatedFields);
-      onUpdate();
     } catch (err) {
       console.error('Error rejecting request:', err);
-      onUpdate();
+      onUpdate(); // refetch only on error to restore correct state
     }
   };
 

@@ -1,50 +1,62 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { db } from '../config/firebase';
 import { doc, updateDoc, Timestamp } from 'firebase/firestore';
 import { BedDouble, CheckCircle, XCircle, Clock, MapPin, Phone, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function BulkOperations({ accommodationRequests = [], currentAdmin, onUpdate }) {
+  const [localRequests, setLocalRequests] = useState(accommodationRequests);
   const [approveModal, setApproveModal] = useState(null);
   const [approveForm, setApproveForm] = useState({ location: '', contactNumber: '', notes: '' });
   const [submitting, setSubmitting] = useState(false);
   const [expandedSection, setExpandedSection] = useState('pending');
 
-  const pending = accommodationRequests.filter(r => r.status === 'pending');
-  const approved = accommodationRequests.filter(r => r.status === 'approved');
-  const rejected = accommodationRequests.filter(r => r.status === 'rejected');
+  useEffect(() => {
+    setLocalRequests(accommodationRequests);
+  }, [accommodationRequests]);
+
+  const pending = localRequests.filter(r => r.status === 'pending');
+  const approved = localRequests.filter(r => r.status === 'approved');
+  const rejected = localRequests.filter(r => r.status === 'rejected');
 
   const handleApprove = async () => {
     if (!approveForm.location.trim()) return;
     setSubmitting(true);
+    const updatedFields = {
+      status: 'approved',
+      location: approveForm.location.trim(),
+      contactNumber: approveForm.contactNumber.trim(),
+      notes: approveForm.notes.trim(),
+      reviewedAt: Timestamp.now(),
+      reviewedBy: currentAdmin?.name || 'Admin'
+    };
+    // Optimistic update
+    setLocalRequests(prev => prev.map(r => r.id === approveModal.id ? { ...r, ...updatedFields } : r));
+    setApproveModal(null);
+    setApproveForm({ location: '', contactNumber: '', notes: '' });
+    setSubmitting(false);
     try {
-      await updateDoc(doc(db, 'accommodation_requests', approveModal.id), {
-        status: 'approved',
-        location: approveForm.location.trim(),
-        contactNumber: approveForm.contactNumber.trim(),
-        notes: approveForm.notes.trim(),
-        reviewedAt: Timestamp.now(),
-        reviewedBy: currentAdmin?.name || 'Admin'
-      });
-      setApproveModal(null);
-      setApproveForm({ location: '', contactNumber: '', notes: '' });
+      await updateDoc(doc(db, 'accommodation_requests', approveModal.id), updatedFields);
       onUpdate();
     } catch (err) {
       console.error('Error approving request:', err);
-    } finally {
-      setSubmitting(false);
+      onUpdate(); // refetch to restore correct state on error
     }
   };
 
   const handleReject = async (request) => {
+    const updatedFields = {
+      status: 'rejected',
+      reviewedAt: Timestamp.now(),
+      reviewedBy: currentAdmin?.name || 'Admin'
+    };
+    // Optimistic update
+    setLocalRequests(prev => prev.map(r => r.id === request.id ? { ...r, ...updatedFields } : r));
     try {
-      await updateDoc(doc(db, 'accommodation_requests', request.id), {
-        status: 'rejected',
-        reviewedAt: Timestamp.now(),
-        reviewedBy: currentAdmin?.name || 'Admin'
-      });
+      await updateDoc(doc(db, 'accommodation_requests', request.id), updatedFields);
       onUpdate();
     } catch (err) {
       console.error('Error rejecting request:', err);
+      onUpdate();
     }
   };
 

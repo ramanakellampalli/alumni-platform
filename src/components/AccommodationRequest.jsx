@@ -9,7 +9,7 @@ export default function AccommodationRequest({ currentUser, request, onRequestSu
   const handleRequest = async () => {
     setLoading(true);
     try {
-      await addDoc(collection(db, 'accommodation_requests'), {
+      const newRequest = {
         userId: currentUser.id,
         userName: `${currentUser.firstName} ${currentUser.lastName}`,
         userPhone: currentUser.phone,
@@ -22,11 +22,11 @@ export default function AccommodationRequest({ currentUser, request, onRequestSu
         notes: '',
         reviewedAt: null,
         reviewedBy: ''
-      });
-      onRequestSubmitted();
+      };
+      const docRef = await addDoc(collection(db, 'accommodation_requests'), newRequest);
+      onRequestSubmitted({ id: docRef.id, ...newRequest });
     } catch (err) {
       console.error('Error submitting accommodation request:', err);
-    } finally {
       setLoading(false);
     }
   };

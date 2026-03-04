@@ -199,7 +199,7 @@ export default function Dashboard() {
         <AccommodationRequest
           currentUser={currentUser}
           request={accommodationRequest}
-          onRequestSubmitted={() => fetchData()}
+          onRequestSubmitted={(newRequest) => setAccommodationRequest(newRequest)}
         />
 
         <StatsOverview

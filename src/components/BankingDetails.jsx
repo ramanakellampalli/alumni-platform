@@ -1,5 +1,6 @@
 import { Copy, CheckCheck } from 'lucide-react';
 import { useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 
 const BANK = {
   accountName: 'ZPHS Valaparla Alumni Association',
@@ -42,9 +43,14 @@ export default function BankingDetails() {
         {/* QR Code Card */}
         <div className="card flex flex-col items-center text-center">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4">Scan to Pay (UPI)</p>
-          {/* Dummy QR — replace src with real QR image later */}
-          <div className="w-44 h-44 bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center mb-3">
-            <p className="text-xs text-gray-400 px-4">QR Code<br />Coming Soon</p>
+          <div className="p-3 bg-white border border-gray-200 rounded-xl mb-3">
+            <QRCodeSVG
+              value={`upi://pay?pa=${BANK.upiId}&pn=${encodeURIComponent(BANK.accountName)}&cu=INR`}
+              size={160}
+              bgColor="#ffffff"
+              fgColor="#111827"
+              level="M"
+            />
           </div>
           <p className="text-sm font-semibold text-gray-800">{BANK.upiId}</p>
           <p className="text-xs text-gray-500 mt-0.5">UPI ID</p>

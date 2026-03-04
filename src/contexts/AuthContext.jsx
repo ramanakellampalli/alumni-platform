@@ -19,12 +19,18 @@ export const AuthProvider = ({ children }) => {
   // Simple login function using lastName and phone
   const login = async (lastName, phone) => {
     try {
+      // Normalize: Title Case for lastName, trim both
+      const normalizedLastName = lastName.trim().split(' ')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
+      const normalizedPhone = phone.trim();
+
       // Query Firestore to find matching user
       const usersRef = collection(db, 'users');
       const q = query(
         usersRef,
-        where('lastName', '==', lastName),
-        where('phone', '==', phone)
+        where('lastName', '==', normalizedLastName),
+        where('phone', '==', normalizedPhone)
       );
       
       const querySnapshot = await getDocs(q);

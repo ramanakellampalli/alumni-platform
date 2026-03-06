@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>ZPHS Valaparla – Alumni Platform | LinkedIn Carousel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+/* ─── Reset ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ─── Tokens ─────────────────────────────────────────── */
+:root {
+  --navy:       #0c1b33;
+  --navy-mid:   #162746;
+  --navy-light: #1e3a5f;
+  --gold:       #c9971c;
+  --gold-light: #e8c068;
+  --gold-pale:  #fdf3dc;
+  --white:      #ffffff;
+  --off-white:  #f8f5ee;
+  --gray:       #6b7280;
+  --text:       #111827;
+}
+
+/* ─── Screen preview ─────────────────────────────────── */
+body {
+  font-family: 'Inter', sans-serif;
+  background: #e5e7eb;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+/* ─── Print hint ─────────────────────────────────────── */
+.print-hint {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 14px 24px;
+  font-size: 14px;
+  color: #374151;
+  text-align: center;
+  max-width: 1080px;
+  width: 100%;
+}
+.print-hint strong { color: var(--navy); }
+@media print { .print-hint { display: none; } }
+
+/* ─── Slide base ─────────────────────────────────────── */
+.slide {
+  width: 1080px;
+  height: 1080px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  page-break-after: always;
+  break-after: page;
+}
+
+/* ─── Print ──────────────────────────────────────────── */
+@media print {
+  body { background: none; padding: 0; gap: 0; }
+  @page { size: 1080px 1080px; margin: 0; }
+  .slide { display: block !important; }
+}
+
+/* ─── Shared header strip ────────────────────────────── */
+.brand-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 52px;
+  z-index: 10;
+}
+.brand-name {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.slide-num {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  opacity: 0.65;
+}
+
+/* ─── Gold accent line ───────────────────────────────── */
+.gold-line-top {
+  position: absolute;
+  top: 54px; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+}
+.gold-line-bottom {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+}
+
+/* ─── DARK slide base ────────────────────────────────── */
+.dark { background: var(--navy); color: var(--white); }
+.dark .brand-name { color: var(--gold-light); }
+.dark .slide-num  { color: rgba(255,255,255,0.5); }
+
+/* ─── LIGHT slide base ───────────────────────────────── */
+.light { background: var(--off-white); color: var(--text); }
+.light .brand-name { color: var(--navy); }
+.light .slide-num  { color: var(--gray); }
+
+/* ─── MID slide base ─────────────────────────────────── */
+.mid { background: var(--navy-mid); color: var(--white); }
+.mid .brand-name { color: var(--gold-light); }
+.mid .slide-num  { color: rgba(255,255,255,0.45); }
+
+/* ─── Content area (below brand bar + line) ──────────── */
+.content {
+  position: absolute;
+  top: 57px; left: 0; right: 0; bottom: 3px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Decorative orbs ────────────────────────────────── */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════ SLIDE 1 – Cover */
+#s1 .content {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 80px;
+  gap: 0;
+}
+#s1 .orb-1 {
+  width: 560px; height: 560px;
+  background: radial-gradient(circle, rgba(201,151,28,0.18), transparent 70%);
+  top: -160px; left: -120px;
+}
+#s1 .orb-2 {
+  width: 480px; height: 480px;
+  background: radial-gradient(circle, rgba(201,151,28,0.12), transparent 70%);
+  bottom: -100px; right: -80px;
+}
+#s1 .orb-3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(255,255,255,0.04), transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+}
+.cover-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  margin-bottom: 28px;
+  position: relative; z-index: 1;
+}
+.cover-year {
+  font-size: 200px;
+  font-weight: 900;
+  line-height: 0.85;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -6px;
+  position: relative; z-index: 1;
+}
+.cover-label {
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-top: 12px;
+  position: relative; z-index: 1;
+}
+.cover-school {
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--white);
+  margin-top: 36px;
+  letter-spacing: -0.5px;
+  position: relative; z-index: 1;
+}
+.cover-sub {
+  font-size: 18px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.55);
+  margin-top: 10px;
+  position: relative; z-index: 1;
+}
+.cover-divider {
+  width: 80px; height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  border-radius: 2px;
+  margin: 28px auto 0;
+  position: relative; z-index: 1;
+}
+.cover-tagline {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--gold-light);
+  margin-top: 20px;
+  letter-spacing: 0.06em;
+  position: relative; z-index: 1;
+}
+
+/* ═══════════════════════════════════ SLIDE 2 – Context */
+#s2 .content { padding: 56px 72px; justify-content: center; gap: 44px; }
+.s2-headline {
+  font-size: 52px;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.1;
+  letter-spacing: -1px;
+  max-width: 700px;
+}
+.s2-headline em { color: var(--gold); font-style: normal; }
+.s2-body {
+  font-size: 20px;
+  color: #374151;
+  line-height: 1.65;
+  max-width: 780px;
+  font-weight: 400;
+}
+.stat-row {
+  display: flex;
+  gap: 24px;
+  margin-top: 8px;
+}
+.stat-box {
+  flex: 1;
+  background: var(--white);
+  border: 1px solid #e5e7eb;
+  border-top: 3px solid var(--gold);
+  border-radius: 12px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.stat-num {
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1;
+}
+.stat-label {
+  font-size: 14px;
+  color: var(--gray);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+/* ═══════════════════════════════════ SLIDE 3 – What Is It */
+#s3 .content { padding: 56px 72px; justify-content: center; gap: 52px; }
+.s3-pre {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+}
+.s3-headline {
+  font-size: 50px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  margin-top: 8px;
+}
+.pillars {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+.pillar {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pillar-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  background: rgba(201,151,28,0.2);
+  display: flex; align-items: center; justify-content: center;
+}
+.pillar-icon svg { width: 22px; height: 22px; fill: var(--gold-light); }
+.pillar h4 { font-size: 17px; font-weight: 700; }
+.pillar p  { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.55; }
+
+/* ═══════════════════════════════════ SLIDE 4 – How It Works */
+#s4 .content { padding: 56px 72px; justify-content: center; gap: 56px; }
+.s4-headline {
+  font-size: 50px;
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: -1px;
+}
+.steps {
+  display: flex;
+  gap: 0;
+  align-items: stretch;
+}
+.step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  padding: 0 20px;
+  position: relative;
+}
+.step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: -1px; top: 24px;
+  width: 2px; height: 48px;
+  background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+}
+.step-num {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: var(--gold-light);
+  font-size: 18px;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step h4 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.step p {
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.55;
+}
+.step-arrow {
+  position: absolute;
+  right: -22px; top: 15px;
+  font-size: 22px;
+  color: #d1d5db;
+}
+
+/* ═══════════════════════════════════ SLIDE 5 – Features */
+#s5 .content { padding: 56px 72px; justify-content: center; gap: 44px; }
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.feat {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  background: var(--white);
+  border: 1px solid #e9e5d8;
+  border-left: 4px solid var(--gold);
+  border-radius: 10px;
+  padding: 22px 24px;
+}
+.feat-num {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--gold-pale);
+  color: var(--gold);
+  font-size: 14px;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.feat-body h4 { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.feat-body p  { font-size: 13px; color: var(--gray); line-height: 1.55; }
+
+/* ═══════════════════════════════════ SLIDE 6 – Transparency */
+#s6 .content {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 70px 80px;
+  gap: 0;
+}
+#s6 .orb-1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(201,151,28,0.15), transparent 70%);
+  top: -100px; right: -100px;
+}
+#s6 .orb-2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(255,255,255,0.04), transparent 70%);
+  bottom: -60px; left: -60px;
+}
+.s6-pre {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  position: relative; z-index: 1;
+}
+.s6-headline {
+  font-size: 68px;
+  font-weight: 900;
+  line-height: 1.0;
+  letter-spacing: -2px;
+  margin-top: 24px;
+  position: relative; z-index: 1;
+}
+.s6-headline .accent { color: var(--gold-light); }
+.s6-body {
+  font-size: 20px;
+  color: rgba(255,255,255,0.65);
+  max-width: 680px;
+  line-height: 1.6;
+  margin-top: 32px;
+  position: relative; z-index: 1;
+}
+.s6-items {
+  display: flex;
+  gap: 32px;
+  margin-top: 52px;
+  position: relative; z-index: 1;
+}
+.s6-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 36px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  flex: 1;
+}
+.s6-item .si-num {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--gold-light);
+  line-height: 1;
+}
+.s6-item .si-label {
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════ SLIDE 7 – Event */
+#s7 .content {
+  padding: 56px 72px;
+  justify-content: center;
+  gap: 0;
+}
+.event-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+  height: 100%;
+}
+.event-left { display: flex; flex-direction: column; gap: 24px; }
+.event-pre {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+}
+.event-date-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.event-day {
+  font-size: 88px;
+  font-weight: 900;
+  color: var(--gold-light);
+  line-height: 0.9;
+  letter-spacing: -3px;
+}
+.event-month-year {
+  font-size: 28px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.event-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.2;
+  margin-top: 8px;
+}
+.event-right { display: flex; flex-direction: column; gap: 18px; }
+.event-feature {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-left: 3px solid var(--gold);
+  border-radius: 10px;
+  padding: 20px 24px;
+}
+.event-feature h4 { font-size: 16px; font-weight: 700; color: var(--white); margin-bottom: 5px; }
+.event-feature p  { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.5; }
+
+/* ═══════════════════════════════════ SLIDE 8 – Closing */
+#s8 .content {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 70px 80px;
+  gap: 0;
+}
+#s8 .orb-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(201,151,28,0.2), transparent 70%);
+  top: -200px; right: -150px;
+}
+#s8 .orb-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(30,58,95,0.8), transparent 70%);
+  bottom: -150px; left: -100px;
+}
+.s8-pre {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  position: relative; z-index: 1;
+}
+.s8-headline {
+  font-size: 62px;
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  margin-top: 20px;
+  position: relative; z-index: 1;
+}
+.s8-school {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--gold-light);
+  margin-top: 16px;
+  letter-spacing: 0.04em;
+  position: relative; z-index: 1;
+}
+.s8-divider {
+  width: 64px; height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  border-radius: 2px;
+  margin: 32px auto;
+  position: relative; z-index: 1;
+}
+.s8-items {
+  display: flex;
+  gap: 20px;
+  margin-top: 8px;
+  position: relative; z-index: 1;
+}
+.s8-item {
+  flex: 1;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 22px 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.s8-item .si-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: rgba(201,151,28,0.2);
+  display: flex; align-items: center; justify-content: center;
+}
+.s8-item .si-icon svg { width: 20px; height: 20px; fill: var(--gold-light); }
+.s8-item h4 { font-size: 14px; font-weight: 700; color: var(--white); }
+.s8-item p  { font-size: 12px; color: rgba(255,255,255,0.55); }
+.s8-footer {
+  font-size: 14px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 40px;
+  position: relative; z-index: 1;
+  letter-spacing: 0.06em;
+}
+</style>
+</head>
+<body>
+
+<div class="print-hint">
+  <strong>How to export as PDF:</strong> Press <strong>Cmd+P</strong> (Mac) or <strong>Ctrl+P</strong> (Windows) &rarr; set Destination to <strong>"Save as PDF"</strong> &rarr; Paper size <strong>Custom: 1080 x 1080</strong>, Margins: <strong>None</strong> &rarr; Save. Then upload directly to LinkedIn as a <strong>Document post</strong>.
+</div>
+
+<!-- ═══════════════════════════════════ SLIDE 1 – Cover -->
+<div class="slide dark" id="s1">
+  <div class="brand-bar">
+    <span class="brand-name">ZPHS Valaparla</span>
+    <span class="slide-num">01 / 08</span>
+  </div>
+  <div class="gold-line-top"></div>
+  <div class="gold-line-bottom"></div>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="content">
+    <div class="cover-eyebrow">Zilla Parishad High School, Valaparla</div>
+    <div class="cover-year">75</div>
+    <div class="cover-label">Years of Excellence</div>
+    <div class="cover-school">Alumni Management Platform</div>
+    <div class="cover-sub">Connecting Generations &middot; Building Community &middot; Celebrating Legacy</div>
+    <div class="cover-divider"></div>
+    <div class="cover-tagline">75th Anniversary Reunion &middot; May 10, 2026</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ SLIDE 2 – The Story -->
+<div class="slide light" id="s2">
+  <div class="brand-bar">
+    <span class="brand-name">ZPHS Valaparla</span>
+    <span class="slide-num">02 / 08</span>
+  </div>
+  <div class="gold-line-top"></div>
+  <div class="gold-line-bottom"></div>
+
+  <div class="content">
+    <div class="s2-headline">
+      75 years of alumni.<br>
+      <em>One platform</em> to bring<br>them all together.
+    </div>
+    <div class="s2-body">
+      ZPHS Valaparla has shaped thousands of lives across generations. As we approach our 75th anniversary, we built a dedicated digital platform to reconnect alumni, coordinate the reunion, and manage funds with complete transparency.
+    </div>
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">75</div>
+        <div class="stat-label">Years of School History</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">1</div>
+        <div class="stat-label">Unified Digital Hub</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">May 2026</div>
+        <div class="stat-label">Grand Reunion Event</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ SLIDE 3 – What Is It -->
+<div class="slide mid" id="s3">
+  <div class="brand-bar">
+    <span class="brand-name">ZPHS Valaparla</span>
+    <span class="slide-num">03 / 08</span>
+  </div>
+  <div class="gold-line-top"></div>
+  <div class="gold-line-bottom"></div>
+
+  <div class="content" style="padding:56px 72px; justify-content:center; gap:36px;">
+    <div>
+      <div class="s3-pre">The Platform</div>
+      <div class="s3-headline">What did we build?</div>
+    </div>
+    <div class="pillars">
+      <div class="pillar">
+        <div class="pillar-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+        </div>
+        <h4>Secure Alumni Portal</h4>
+        <p>Login with Last Name + Phone — only verified alumni gain access. No passwords, no friction.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">
+          <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+        </div>
+        <h4>Financial Transparency</h4>
+        <p>Every donation and expense recorded and visible to all alumni — live, real-time, no hidden figures.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">
+          <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+        </div>
+        <h4>Event Coordination</h4>
+        <p>Virtual meetings, committee organisation, accommodation requests, and a live event countdown.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ SLIDE 4 – How It Works -->
+<div class="slide light" id="s4">
+  <div class="brand-bar">
+    <span class="brand-name">ZPHS Valaparla</span>
+    <span class="slide-num">04 / 08</span>
+  </div>
+  <div class="gold-line-top"></div>
+  <div class="gold-line-bottom"></div>
+
+  <div class="content">
+    <div style="padding:56px 72px 40px; gap:52px; display:flex; flex-direction:column; justify-content:center; height:100%;">
+      <div class="s4-headline">How an alumni gets started</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h4>Register</h4>
+          <p>Enter first name, last name, phone number, graduation year and village</p>
+          <span class="step-arrow">&#8594;</span>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h4>Login</h4>
+          <p>Sign in with Last Name + Phone — simple and secure, no email required</p>
+          <span class="step-arrow">&#8594;</span>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h4>Explore</h4>
+          <p>See fund balance, meetings, committees, banking details and reports</p>
+          <span class="step-arrow">&#8594;</span>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <h4>Participate</h4>
+          <p>Join virtual meetings, donate via QR code, request accommodation</p>
+        </div>
+      </div>
+      <div style="background:#fff; border:1px solid #e5e7eb; border-top:3px solid var(--gold); border-radius:12px; padding:22px 28px; display:flex; align-items:center; gap:16px;">
+        <div style="width:40px; height:40px; background:var(--gold-pale); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--gold)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        </div>
+        <div style="font-size:15px; color:#374151; line-height:1.5;">
+          <strong style="color:var(--navy);">Works on any device.</strong> No app download needed — alumni simply open a browser link from mobile, tablet, or computer.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ SLIDE 5 – Features -->
+<div class="slide light" id="s5">
+  <div class="brand-bar">
+    <span class="brand-name">ZPHS Valaparla</span>
+    <span class="slide-num">05 / 08</span>
+  </div>
+  <div class="gold-line-top"></div>
+  <div class="gold-line-bottom"></div>
+
+  <div class="content">
+    <div style="padding:56px 72px; display:flex; flex-direction:column; justify-content:center; gap:36px; height:100%;">
+      <div>
+        <div style="font-size:13px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold);">Platform Features</div>
+        <div style="font-size:50px; font-weight:800; color:var(--navy); letter-spacing:-1px; margin-top:6px;">Six modules. One mission.</div>
+      </div>
+      <div class="features-grid">
+        <div class="feat">
+          <div class="feat-num">01</div>
+          <div class="feat-body">
+            <h4>Meeting Hub</h4>
+            <p>Schedule and join virtual meetings. Live "Join Now" activates automatically. Committee-restricted access.</p>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="feat-num">02</div>
+          <div class="feat-body">
+            <h4>Donation Ledger</h4>
+            <p>Every donation — donor name, amount, village, year of study — visible to the entire alumni community.</p>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="feat-num">03</div>
+          <div class="feat-body">
+            <h4>Expense Tracker</h4>
+            <p>Every rupee spent categorised and logged. Complete accountability for reunion planning costs.</p>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="feat-num">04</div>
+          <div class="feat-body">
+            <h4>Committee Directory</h4>
+            <p>Browse sub-committees, find fellow members, and see contact details for your group.</p>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="feat-num">05</div>
+          <div class="feat-body">
+            <h4>Financial Reports</h4>
+            <p>Auto-generated summary with total raised, spent, and net balance. Downloadable at any time.</p>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="feat-num">06</div>
+          <div class="feat-body">
+            <h4>Banking &amp; UPI QR</h4>
+            <p>Official account details and a live QR code — alumni scan and donate instantly via any UPI app.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ SLIDE 6 – Transparency -->
+<div class="slide dark" id="s6">
+  <div class="brand-bar">
+    <span class="brand-name">ZPHS Valaparla</span>
+    <span class="slide-num">06 / 08</span>
+  </div>
+  <div class="gold-line-top"></div>
+  <div class="gold-line-bottom"></div>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="content">
+    <div class="s6-pre">Financial Trust</div>
+    <div class="s6-headline">
+      Every rupee.<br><span class="accent">Fully visible.</span>
+    </div>
+    <div class="s6-body">
+      All donations and expenses are recorded publicly and accessible to every registered alumni. No opaque fund management — just complete, real-time transparency that builds community trust.
+    </div>
+    <div class="s6-items">
+      <div class="s6-item">
+        <div class="si-num">Donations</div>
+        <div class="si-label">Fully logged &amp; searchable</div>
+      </div>
+      <div class="s6-item">
+        <div class="si-num">Expenses</div>
+        <div class="si-label">Categorised &amp; verified</div>
+      </div>
+      <div class="s6-item">
+        <div class="si-num">Balance</div>
+        <div class="si-label">Live net fund — always visible</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ SLIDE 7 – The Event -->
+<div class="slide mid" id="s7">
+  <div class="brand-bar">
+    <span class="brand-name">ZPHS Valaparla</span>
+    <span class="slide-num">07 / 08</span>
+  </div>
+  <div class="gold-line-top"></div>
+  <div class="gold-line-bottom"></div>
+
+  <div class="content">
+    <div style="padding:56px 72px; height:100%; display:flex; flex-direction:column; justify-content:center;">
+      <div class="event-grid">
+        <div class="event-left">
+          <div class="event-pre">Save the Date</div>
+          <div class="event-date-block">
+            <div class="event-day">10</div>
+            <div class="event-month-year">May &nbsp; 2026</div>
+          </div>
+          <div class="event-title">ZPHS Valaparla<br>75th Anniversary<br>Grand Reunion</div>
+        </div>
+        <div class="event-right">
+          <div class="event-feature">
+            <h4>Virtual Meetings</h4>
+            <p>Committees meet regularly online to plan the event. Access is managed through the platform.</p>
+          </div>
+          <div class="event-feature">
+            <h4>Accommodation Requests</h4>
+            <p>Alumni travelling from afar can request accommodation directly through the platform — no phone calls needed.</p>
+          </div>
+          <div class="event-feature">
+            <h4>Live Countdown</h4>
+            <p>A real-time countdown banner keeps the date front-of-mind for every alumni who visits the site.</p>
+          </div>
+          <div class="event-feature">
+            <h4>UPI Donations</h4>
+            <p>Scan the QR code in the Banking tab to contribute instantly from any UPI-enabled app.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ SLIDE 8 – Closing -->
+<div class="slide dark" id="s8">
+  <div class="brand-bar">
+    <span class="brand-name">ZPHS Valaparla</span>
+    <span class="slide-num">08 / 08</span>
+  </div>
+  <div class="gold-line-top"></div>
+  <div class="gold-line-bottom"></div>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="content">
+    <div class="s8-pre">ZPHS Valaparla &middot; Est. 1951</div>
+    <div class="s8-headline">
+      75 Years.<br>One Community.
+    </div>
+    <div class="s8-school">Alumni Management Platform</div>
+    <div class="s8-divider"></div>
+    <div class="s8-items">
+      <div class="s8-item">
+        <div class="si-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+        </div>
+        <h4>Secure</h4>
+        <p>Role-based access for alumni &amp; admins</p>
+      </div>
+      <div class="s8-item">
+        <div class="si-icon">
+          <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+        </div>
+        <h4>Transparent</h4>
+        <p>Every donation &amp; expense public</p>
+      </div>
+      <div class="s8-item">
+        <div class="si-icon">
+          <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+        </div>
+        <h4>Event-Ready</h4>
+        <p>Meetings, accommodation &amp; countdown</p>
+      </div>
+      <div class="s8-item">
+        <div class="si-icon">
+          <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        </div>
+        <h4>Community</h4>
+        <p>Committees, directory &amp; connection</p>
+      </div>
+    </div>
+    <div class="s8-footer">ZPHS Valaparla Alumni Platform &middot; 75th Anniversary &middot; May 10, 2026</div>
+    <div style="position:relative; z-index:1; margin-top:16px; display:inline-flex; align-items:center; gap:10px; background:rgba(201,151,28,0.12); border:1px solid rgba(201,151,28,0.3); border-radius:999px; padding:8px 20px;">
+      <span style="font-size:12px; color:rgba(255,255,255,0.45); letter-spacing:0.08em; text-transform:uppercase; font-weight:500;">Built by</span>
+      <span style="font-size:15px; font-weight:800; color:var(--gold-light); letter-spacing:0.04em;">OhYeah</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,14 +1,14 @@
 import { Copy, CheckCheck } from 'lucide-react';
 import { useState } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
+import upiQr from '../assets/upi-qr.jpg';
 
 const BANK = {
-  accountName: 'ZPHS Valaparla Alumni Association',
-  accountNumber: 'XXXXXXXXXXXX',
-  ifsc: 'SBIN0XXXXXX',
-  branch: 'SBI – Valaparla Branch',
+  accountName: 'OLD STUDENTS ASSOCIATION ZPHS VALAPARLA',
+  accountNumber: '597510000001038',
+  ifsc: 'UBIN0CG7999',
+  branch: 'Andhra Pradesh Grameena Bank – Valaparla',
   accountType: 'Savings',
-  upiId: 'alumni@sbi',
+  upiId: '5975097701@myapgb',
 };
 
 function CopyField({ label, value }) {
@@ -38,22 +38,14 @@ function CopyField({ label, value }) {
 export default function BankingDetails() {
   return (
     <div className="max-w-2xl">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-stretch">
 
         {/* QR Code Card */}
-        <div className="card flex flex-col items-center text-center">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4">Scan to Pay (UPI)</p>
-          <div className="p-3 bg-white border border-gray-200 rounded-xl mb-3">
-            <QRCodeSVG
-              value={`upi://pay?pa=${BANK.upiId}&pn=${encodeURIComponent(BANK.accountName)}&cu=INR`}
-              size={160}
-              bgColor="#ffffff"
-              fgColor="#111827"
-              level="M"
-            />
+        <div className="card flex flex-col h-full">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4 text-center">Scan to Pay (UPI)</p>
+          <div className="flex-1 min-h-0 overflow-hidden rounded-xl">
+            <img src={upiQr} alt="UPI QR Code" className="w-full h-full object-cover object-center" />
           </div>
-          <p className="text-sm font-semibold text-gray-800">{BANK.upiId}</p>
-          <p className="text-xs text-gray-500 mt-0.5">UPI ID</p>
         </div>
 
         {/* Bank Details Card */}
@@ -64,6 +56,7 @@ export default function BankingDetails() {
           <CopyField label="IFSC Code" value={BANK.ifsc} />
           <CopyField label="Bank & Branch" value={BANK.branch} />
           <CopyField label="Account Type" value={BANK.accountType} />
+          <CopyField label="UPI ID" value={BANK.upiId} />
         </div>
       </div>
 

@@ -37,7 +37,7 @@ function CopyField({ label, value }) {
 
 export default function BankingDetails() {
   return (
-    <div>
+    <div className="max-w-2xl">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
 
         {/* QR Code Card */}

@@ -41,9 +41,11 @@ export default function BankingDetails() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-stretch">
 
         {/* QR Code Card */}
-        <div className="card flex flex-col items-center text-center">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4">Scan to Pay (UPI)</p>
-          <img src={upiQr} alt="UPI QR Code" className="w-full flex-1 object-cover rounded-xl" />
+        <div className="card flex flex-col h-full">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4 text-center">Scan to Pay (UPI)</p>
+          <div className="flex-1 min-h-0 overflow-hidden rounded-xl">
+            <img src={upiQr} alt="UPI QR Code" className="w-full h-full object-cover object-center" />
+          </div>
         </div>
 
         {/* Bank Details Card */}

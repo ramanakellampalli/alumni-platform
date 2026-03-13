@@ -38,13 +38,13 @@ function CopyField({ label, value }) {
 export default function BankingDetails() {
   return (
     <div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-stretch">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
 
         {/* QR Code Card */}
         <div className="card flex flex-col items-center text-center">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4">Scan to Pay (UPI)</p>
           <div className="p-3 bg-white border border-gray-200 rounded-xl mb-3 w-full">
-            <img src={upiQr} alt="UPI QR Code" className="w-full object-contain" />
+            <img src={upiQr} alt="UPI QR Code" className="w-full max-h-64 object-contain" />
           </div>
           <p className="text-sm font-semibold text-gray-800">{BANK.upiId}</p>
           <p className="text-xs text-gray-500 mt-0.5">UPI ID</p>

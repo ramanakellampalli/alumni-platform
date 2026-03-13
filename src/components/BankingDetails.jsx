@@ -46,8 +46,6 @@ export default function BankingDetails() {
           <div className="p-3 bg-white border border-gray-200 rounded-xl mb-3 w-full">
             <img src={upiQr} alt="UPI QR Code" className="w-full max-h-64 object-contain" />
           </div>
-          <p className="text-sm font-semibold text-gray-800">{BANK.upiId}</p>
-          <p className="text-xs text-gray-500 mt-0.5">UPI ID</p>
         </div>
 
         {/* Bank Details Card */}
@@ -58,6 +56,7 @@ export default function BankingDetails() {
           <CopyField label="IFSC Code" value={BANK.ifsc} />
           <CopyField label="Bank & Branch" value={BANK.branch} />
           <CopyField label="Account Type" value={BANK.accountType} />
+          <CopyField label="UPI ID" value={BANK.upiId} />
         </div>
       </div>
 

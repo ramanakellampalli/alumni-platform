@@ -43,9 +43,7 @@ export default function BankingDetails() {
         {/* QR Code Card */}
         <div className="card flex flex-col items-center text-center">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4">Scan to Pay (UPI)</p>
-          <div className="p-3 bg-white border border-gray-200 rounded-xl mb-3 w-full">
-            <img src={upiQr} alt="UPI QR Code" className="w-full max-h-64 object-contain" />
-          </div>
+          <img src={upiQr} alt="UPI QR Code" className="w-48 rounded-xl" />
         </div>
 
         {/* Bank Details Card */}

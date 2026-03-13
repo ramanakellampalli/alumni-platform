@@ -3,12 +3,12 @@ import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 
 const BANK = {
-  accountName: 'ZPHS Valaparla Alumni Association',
-  accountNumber: 'XXXXXXXXXXXX',
-  ifsc: 'SBIN0XXXXXX',
-  branch: 'SBI – Valaparla Branch',
+  accountName: 'OLD STUDENTS ASSOCIATION ZPHS VALAPARLA',
+  accountNumber: '597510000001038',
+  ifsc: 'UBIN0CG7999',
+  branch: 'Andhra Pradesh Grameena Bank – Valaparla',
   accountType: 'Savings',
-  upiId: 'alumni@sbi',
+  upiId: '5975097701@myapgb',
 };
 
 function CopyField({ label, value }) {

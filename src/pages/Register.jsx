@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../config/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import Toast from '../components/Toast';
 import Footer from '../components/Footer';
@@ -20,10 +20,15 @@ export default function Register() {
   const [toast, setToast] = useState(null);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    if (name === 'phone') {
+      const digits = value.replace(/\D/g, '');
+      if (digits.startsWith('0')) return;
+      if (digits.length > 10) return;
+      setFormData({ ...formData, phone: digits });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -32,14 +37,44 @@ export default function Register() {
     setLoading(true);
 
     try {
+      if (formData.phone.length !== 10) {
+        setError('Phone number must be exactly 10 digits.');
+        setLoading(false);
+        return;
+      }
+
       const toTitleCase = str => str.trim().split(' ')
         .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+
+      const firstName = toTitleCase(formData.firstName);
+      const lastName = toTitleCase(formData.lastName);
+
+      // Check duplicate by phone
+      const phoneSnap = await getDocs(query(collection(db, 'users'), where('phone', '==', formData.phone)));
+      if (!phoneSnap.empty) {
+        setError('A user with this phone number is already registered.');
+        setLoading(false);
+        return;
+      }
+
+      // Check duplicate by name + alumni year
+      const nameSnap = await getDocs(query(
+        collection(db, 'users'),
+        where('firstName', '==', firstName),
+        where('lastName', '==', lastName),
+        where('alumniYear', '==', formData.alumniYear)
+      ));
+      if (!nameSnap.empty) {
+        setError('A user with the same name and alumni year is already registered.');
+        setLoading(false);
+        return;
+      }
 
       // Add user to Firestore
       await addDoc(collection(db, 'users'), {
         ...formData,
-        firstName: toTitleCase(formData.firstName),
-        lastName: toTitleCase(formData.lastName),
+        firstName,
+        lastName,
         isAdmin: false,
         createdAt: new Date().toISOString()
       });
@@ -129,7 +164,8 @@ export default function Register() {
                 value={formData.phone}
                 onChange={handleChange}
                 className="input-field"
-                placeholder="123-456-7890"
+                placeholder="9876543210"
+                maxLength={10}
                 required
               />
             </div>

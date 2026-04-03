@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../config/firebase';
 import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc, updateDoc, where } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { Plus, Calendar, IndianRupee, FileText, Users, Trash2, User, Shield, UserPlus, Eye, EyeOff, Briefcase, UserMinus } from 'lucide-react';
+import { Plus, Calendar, IndianRupee, FileText, Users, Trash2, User, Shield, UserPlus, Eye, EyeOff, Briefcase, UserMinus, Pencil, X } from 'lucide-react';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
 import Footer from '../components/Footer';
@@ -86,6 +86,8 @@ export default function AdminDashboard() {
   const [showDonationForm, setShowDonationForm] = useState(false);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [showMeetingForm, setShowMeetingForm] = useState(false);
+  const [editDonation, setEditDonation] = useState(null);
+  const [deleteDonationTarget, setDeleteDonationTarget] = useState(null);
   const [accommodationRequests, setAccommodationRequests] = useState([]);
 
   useEffect(() => {
@@ -185,6 +187,35 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error adding donation:', error);
       showToast('Failed to record donation', 'error');
+    }
+  };
+
+  const handleEditDonation = async (e) => {
+    e.preventDefault();
+    try {
+      await updateDoc(doc(db, 'donations', editDonation.id), {
+        ...editDonation,
+        modifiedBy: currentAdmin?.name || currentAdmin?.email || 'Unknown',
+        modifiedAt: new Date().toISOString()
+      });
+      showToast('Donation updated successfully!');
+      setEditDonation(null);
+      fetchData();
+    } catch (error) {
+      console.error('Error updating donation:', error);
+      showToast('Failed to update donation', 'error');
+    }
+  };
+
+  const handleDeleteDonation = async () => {
+    try {
+      await deleteDoc(doc(db, 'donations', deleteDonationTarget.id));
+      showToast('Donation deleted.');
+      setDeleteDonationTarget(null);
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting donation:', error);
+      showToast('Failed to delete donation', 'error');
     }
   };
 
@@ -462,6 +493,85 @@ export default function AdminDashboard() {
           type={toast.type}
           onClose={() => setToast(null)}
         />
+      )}
+
+      {/* Edit Donation Modal */}
+      {editDonation && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Edit Donation</h3>
+              <button onClick={() => setEditDonation(null)} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleEditDonation} className="p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Date</label>
+                  <input type="date" className="input-field" value={editDonation.date} onChange={(e) => setEditDonation({ ...editDonation, date: e.target.value })} required />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Donor Name</label>
+                  <input type="text" className="input-field" value={editDonation.donorName} onChange={(e) => setEditDonation({ ...editDonation, donorName: e.target.value })} required />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Amount (₹)</label>
+                  <input type="number" step="0.01" className="input-field" value={editDonation.amount} onChange={(e) => setEditDonation({ ...editDonation, amount: e.target.value })} required />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Phone</label>
+                  <input type="tel" className="input-field" value={editDonation.phone || ''} maxLength={10} onChange={(e) => setEditDonation({ ...editDonation, phone: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Passed Out Year</label>
+                  <input type="number" className="input-field" value={editDonation.alumniYear || ''} min="1950" max="2030" onChange={(e) => setEditDonation({ ...editDonation, alumniYear: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Village</label>
+                  <input type="text" className="input-field" value={editDonation.village || ''} onChange={(e) => setEditDonation({ ...editDonation, village: e.target.value })} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Notes</label>
+                <textarea className="input-field" rows="2" value={editDonation.notes || ''} onChange={(e) => setEditDonation({ ...editDonation, notes: e.target.value })} />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setEditDonation(null)} className="btn-secondary">Cancel</button>
+                <button type="submit" className="btn-primary">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Donation Confirmation Modal */}
+      {deleteDonationTarget && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Donation</h3>
+              <p className="text-gray-600 text-sm mb-1">Are you sure you want to delete this donation?</p>
+              <p className="text-sm font-medium text-gray-800 mb-6">
+                {deleteDonationTarget.donorName} — ₹{parseFloat(deleteDonationTarget.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDeleteDonationTarget(null)}
+                  className="flex-1 btn-secondary"
+                >
+                  No, Close
+                </button>
+                <button
+                  onClick={handleDeleteDonation}
+                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium"
+                >
+                  Yes, Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Confirmation Modal */}
@@ -755,6 +865,7 @@ export default function AdminDashboard() {
                         <th className="pb-3 text-xs sm:text-sm">Village</th>
                         <th className="pb-3 text-xs sm:text-sm">Notes</th>
                         <th className="pb-3 text-xs sm:text-sm">Recorded By</th>
+                        {currentAdmin?.isSuperAdmin && <th className="pb-3 text-xs sm:text-sm">Actions</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -769,7 +880,34 @@ export default function AdminDashboard() {
                           <td className="py-3 text-xs sm:text-sm">{donation.alumniYear || '-'}</td>
                           <td className="py-3 text-xs sm:text-sm">{donation.village || '-'}</td>
                           <td className="py-3 text-xs sm:text-sm">{donation.notes || '-'}</td>
-                          <td className="py-3 text-xs sm:text-sm text-gray-500">{donation.createdBy || '-'}</td>
+                          <td className="py-3 text-xs sm:text-sm text-gray-500">
+                            <span>{donation.createdBy || '-'}</span>
+                            {donation.modifiedBy && (
+                              <div className="text-xs text-amber-600 mt-0.5">
+                                Modified by {donation.modifiedBy}
+                              </div>
+                            )}
+                          </td>
+                          {currentAdmin?.isSuperAdmin && (
+                            <td className="py-3">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => setEditDonation({ ...donation })}
+                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                  title="Edit"
+                                >
+                                  <Pencil size={14} />
+                                </button>
+                                <button
+                                  onClick={() => setDeleteDonationTarget(donation)}
+                                  className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  title="Delete"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          )}
                         </tr>
                       ))}
                     </tbody>

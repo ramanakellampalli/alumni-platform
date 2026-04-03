@@ -546,33 +546,16 @@ export default function AdminDashboard() {
       )}
 
       {/* Delete Donation Confirmation Modal */}
-      {deleteDonationTarget && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm">
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Donation</h3>
-              <p className="text-gray-600 text-sm mb-1">Are you sure you want to delete this donation?</p>
-              <p className="text-sm font-medium text-gray-800 mb-6">
-                {deleteDonationTarget.donorName} — ₹{parseFloat(deleteDonationTarget.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setDeleteDonationTarget(null)}
-                  className="flex-1 btn-secondary"
-                >
-                  No, Close
-                </button>
-                <button
-                  onClick={handleDeleteDonation}
-                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium"
-                >
-                  Yes, Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={!!deleteDonationTarget}
+        onClose={() => setDeleteDonationTarget(null)}
+        onConfirm={handleDeleteDonation}
+        title="Delete Donation"
+        message={deleteDonationTarget ? `Are you sure you want to delete the donation from ${deleteDonationTarget.donorName} — ₹${parseFloat(deleteDonationTarget.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}?` : ''}
+        confirmText="Yes, Delete"
+        cancelText="No, Close"
+        type="danger"
+      />
 
       {/* Confirmation Modal */}
       <ConfirmModal

@@ -170,6 +170,54 @@
     will-change: transform;
   }
 
+  /* Date badges for event dates */
+  @keyframes date-glow {
+    0%, 100% {
+      box-shadow: 0 0 8px rgba(251, 191, 36, 0.3), 0 0 20px rgba(251, 191, 36, 0.1);
+      border-color: rgba(251, 191, 36, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.6), 0 0 30px rgba(251, 191, 36, 0.25);
+      border-color: rgba(251, 191, 36, 0.8);
+    }
+  }
+
+  @keyframes date-shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .date-badge {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    background: rgba(251, 191, 36, 0.07);
+    animation: date-glow 2.5s ease-in-out infinite;
+    gap: 1px;
+  }
+
+  .date-badge-day {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(251, 191, 36, 0.7);
+  }
+
+  .date-badge-date {
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #b8860b 0%, #ffd700 30%, #fff8c4 50%, #ffd700 70%, #b8860b 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: date-shimmer 2.5s linear infinite;
+  }
+
   /* Sparkles */
   @keyframes sparkle {
     0%, 100% { opacity: 0; transform: scale(0); }

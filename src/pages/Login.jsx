@@ -178,8 +178,17 @@ export default function Login() {
             </h1>
           </div>
           <div className="animate-rise" style={{ animationDelay: '0.85s' }}>
-            <p className="text-gray-400 mt-2">
-              Platinum Jubilee Celebrations: Two days: May 9th and 10th
+            <p className="text-gray-300 mt-2 font-medium">Platinum Jubilee Celebrations</p>
+            <p className="mt-1.5 flex items-center justify-center gap-3 text-sm">
+              <span className="date-badge">
+                <span className="date-badge-day">Saturday</span>
+                <span className="date-badge-date">May 9th</span>
+              </span>
+              <span className="text-amber-400/60 text-xs">&amp;</span>
+              <span className="date-badge">
+                <span className="date-badge-day">Sunday</span>
+                <span className="date-badge-date">May 10th</span>
+              </span>
             </p>
           </div>
         </div>
@@ -225,8 +234,17 @@ export default function Login() {
                 </h1>
               </div>
               <div className="animate-rise" style={{ animationDelay: '0.85s' }}>
-                <p className="text-gray-400 text-sm mt-1.5">
-                  Platinum Jubilee Celebrations: Two days: May 9th and 10th
+                <p className="text-gray-300 text-sm mt-1.5 font-medium">Platinum Jubilee Celebrations</p>
+                <p className="mt-1.5 flex items-center justify-center gap-3 text-sm">
+                  <span className="date-badge">
+                    <span className="date-badge-day">Saturday</span>
+                    <span className="date-badge-date">May 9th</span>
+                  </span>
+                  <span className="text-amber-400/60 text-xs">&amp;</span>
+                  <span className="date-badge">
+                    <span className="date-badge-day">Sunday</span>
+                    <span className="date-badge-date">May 10th</span>
+                  </span>
                 </p>
               </div>
             </div>

@@ -58,7 +58,7 @@ export default function Dashboard() {
 
       // Fetch users
       const usersSnapshot = await getDocs(collection(db, 'users'));
-      setUsers(usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setUsers(usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)));
 
       // Fetch committees
       const committeesSnapshot = await getDocs(collection(db, 'committees'));
@@ -193,6 +193,7 @@ export default function Dashboard() {
         onNavigate={navigate}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
+        onDonateNow={() => setActiveTab('banking')}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -222,7 +223,7 @@ export default function Dashboard() {
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  {tab}
+                  {tab === 'banking' ? 'Donate Now' : tab}
                 </button>
               ))}
             </nav>
@@ -368,7 +369,17 @@ export default function Dashboard() {
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{donation.alumniYear || '-'}</td>
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{donation.village || '-'}</td>
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{donation.notes || '-'}</td>
-                        <td className="py-3 text-gray-500 text-xs sm:text-sm">{donation.createdBy || '-'}</td>
+                        <td className="py-3 text-xs sm:text-sm">
+                          <div className="text-gray-500">{donation.createdBy || '-'}</div>
+                          {donation.modifiedBy && (
+                            <div className="text-amber-600 text-xs mt-0.5">
+                              <div>Modified by {donation.modifiedBy}</div>
+                              <div className="text-gray-400">
+                                {new Date(donation.modifiedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            </div>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -443,7 +454,17 @@ export default function Dashboard() {
                         </td>
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{expense.category || '-'}</td>
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{expense.notes || '-'}</td>
-                        <td className="py-3 text-gray-500 text-xs sm:text-sm">{expense.createdBy || '-'}</td>
+                        <td className="py-3 text-xs sm:text-sm">
+                          <div className="text-gray-500">{expense.createdBy || '-'}</div>
+                          {expense.modifiedBy && (
+                            <div className="text-amber-600 text-xs mt-0.5">
+                              <div>Modified by {expense.modifiedBy}</div>
+                              <div className="text-gray-400">
+                                {new Date(expense.modifiedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            </div>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

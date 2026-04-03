@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../config/firebase';
 import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc, updateDoc, where } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { Plus, Calendar, IndianRupee, FileText, Users, Trash2, User, Shield, UserPlus, Eye, EyeOff, Briefcase, UserMinus } from 'lucide-react';
+import { Plus, Calendar, IndianRupee, FileText, Users, Trash2, User, Shield, UserPlus, Eye, EyeOff, Briefcase, UserMinus, Pencil, X } from 'lucide-react';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
 import Footer from '../components/Footer';
@@ -86,6 +86,9 @@ export default function AdminDashboard() {
   const [showDonationForm, setShowDonationForm] = useState(false);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [showMeetingForm, setShowMeetingForm] = useState(false);
+  const [editDonation, setEditDonation] = useState(null);
+  const [deleteDonationTarget, setDeleteDonationTarget] = useState(null);
+  const [editExpense, setEditExpense] = useState(null);
   const [accommodationRequests, setAccommodationRequests] = useState([]);
 
   useEffect(() => {
@@ -125,7 +128,7 @@ export default function AdminDashboard() {
 
       // Fetch users
       const usersSnapshot = await getDocs(collection(db, 'users'));
-      setUsers(usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setUsers(usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)));
 
       // Fetch admins
       const adminsSnapshot = await getDocs(collection(db, 'admins'));
@@ -154,17 +157,17 @@ export default function AdminDashboard() {
   const handleAddMeeting = async (e) => {
     e.preventDefault();
 
-    // Validate at least one committee is selected
     if (meetingForm.committeeIds.length === 0) {
       showToast('Please select at least one committee for this meeting', 'error');
       return;
     }
 
     try {
-      await addDoc(collection(db, 'meetings'), meetingForm);
+      const docRef = await addDoc(collection(db, 'meetings'), meetingForm);
+      const newMeeting = { id: docRef.id, ...meetingForm };
+      setMeetings(prev => [newMeeting, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)));
       showToast('Meeting added successfully!');
       setMeetingForm({ title: '', date: '', timeFrom: '', timeTo: '', description: '', zoomLink: '', committeeIds: [] });
-      fetchData();
     } catch (error) {
       console.error('Error adding meeting:', error);
       showToast('Failed to add meeting', 'error');
@@ -174,31 +177,81 @@ export default function AdminDashboard() {
   const handleAddDonation = async (e) => {
     e.preventDefault();
     try {
-      await addDoc(collection(db, 'donations'), {
+      const newData = {
         ...donationForm,
         createdBy: currentAdmin?.name || currentAdmin?.email || 'Unknown',
         createdAt: new Date().toISOString()
-      });
+      };
+      const docRef = await addDoc(collection(db, 'donations'), newData);
+      setDonations(prev => [{ id: docRef.id, ...newData }, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)));
       showToast('Donation recorded successfully!');
       setDonationForm({ date: '', donorName: '', amount: '', phone: '', alumniYear: '', village: '', notes: '' });
-      fetchData();
     } catch (error) {
       console.error('Error adding donation:', error);
       showToast('Failed to record donation', 'error');
     }
   };
 
+  const handleEditDonation = async (e) => {
+    e.preventDefault();
+    try {
+      const updated = {
+        ...editDonation,
+        modifiedBy: currentAdmin?.name || currentAdmin?.email || 'Unknown',
+        modifiedAt: new Date().toISOString()
+      };
+      await updateDoc(doc(db, 'donations', editDonation.id), updated);
+      setDonations(prev => prev.map(d => d.id === editDonation.id ? updated : d));
+      showToast('Donation updated successfully!');
+      setEditDonation(null);
+    } catch (error) {
+      console.error('Error updating donation:', error);
+      showToast('Failed to update donation', 'error');
+    }
+  };
+
+  const handleDeleteDonation = async () => {
+    try {
+      await deleteDoc(doc(db, 'donations', deleteDonationTarget.id));
+      setDonations(prev => prev.filter(d => d.id !== deleteDonationTarget.id));
+      showToast('Donation deleted.');
+      setDeleteDonationTarget(null);
+    } catch (error) {
+      console.error('Error deleting donation:', error);
+      showToast('Failed to delete donation', 'error');
+    }
+  };
+
+  const handleEditExpense = async (e) => {
+    e.preventDefault();
+    try {
+      const updated = {
+        ...editExpense,
+        modifiedBy: currentAdmin?.name || currentAdmin?.email || 'Unknown',
+        modifiedAt: new Date().toISOString()
+      };
+      await updateDoc(doc(db, 'expenses', editExpense.id), updated);
+      setExpenses(prev => prev.map(ex => ex.id === editExpense.id ? updated : ex));
+      showToast('Expense updated successfully!');
+      setEditExpense(null);
+    } catch (error) {
+      console.error('Error updating expense:', error);
+      showToast('Failed to update expense', 'error');
+    }
+  };
+
   const handleAddExpense = async (e) => {
     e.preventDefault();
     try {
-      await addDoc(collection(db, 'expenses'), {
+      const newData = {
         ...expenseForm,
         createdBy: currentAdmin?.name || currentAdmin?.email || 'Unknown',
         createdAt: new Date().toISOString()
-      });
+      };
+      const docRef = await addDoc(collection(db, 'expenses'), newData);
+      setExpenses(prev => [{ id: docRef.id, ...newData }, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)));
       showToast('Expense recorded successfully!');
       setExpenseForm({ date: '', description: '', amount: '', category: '', notes: '' });
-      fetchData();
     } catch (error) {
       console.error('Error adding expense:', error);
       showToast('Failed to record expense', 'error');
@@ -213,8 +266,8 @@ export default function AdminDashboard() {
       onConfirm: async () => {
         try {
           await deleteDoc(doc(db, 'meetings', meetingId));
+          setMeetings(prev => prev.filter(m => m.id !== meetingId));
           showToast('Meeting deleted successfully!');
-          fetchData();
         } catch (error) {
           console.error('Error deleting meeting:', error);
           showToast('Failed to delete meeting', 'error');
@@ -241,19 +294,18 @@ export default function AdminDashboard() {
 
       const uid = userCredential.user.uid;
 
-      // Add to admins collection
-      await setDoc(doc(db, 'admins', uid), {
+      const newAdmin = {
         email: adminForm.email,
         name: adminForm.name,
         isAdmin: true,
         isSuperAdmin: false,
         createdAt: new Date().toISOString(),
         createdBy: currentAdmin.uid
-      });
-
+      };
+      await setDoc(doc(db, 'admins', uid), newAdmin);
+      setAdmins(prev => [...prev, { id: uid, uid, ...newAdmin }]);
       showToast('Admin added successfully!');
       setAdminForm({ email: '', password: '', name: '' });
-      fetchData();
     } catch (error) {
       console.error('Error adding admin:', error);
       if (error.code === 'auth/email-already-in-use') {
@@ -284,8 +336,8 @@ export default function AdminDashboard() {
       onConfirm: async () => {
         try {
           await deleteDoc(doc(db, 'admins', adminId));
+          setAdmins(prev => prev.filter(a => a.id !== adminId));
           showToast('Admin removed successfully!');
-          fetchData();
         } catch (error) {
           console.error('Error removing admin:', error);
           showToast('Failed to remove admin', 'error');
@@ -298,14 +350,17 @@ export default function AdminDashboard() {
   const handleCreateCommittee = async (e) => {
     e.preventDefault();
     try {
-      await addDoc(collection(db, 'committees'), {
+      const newData = {
         ...committeeForm,
         createdAt: new Date().toISOString(),
         createdBy: currentAdmin.uid
-      });
+      };
+      const docRef = await addDoc(collection(db, 'committees'), newData);
+      const newCommittee = { id: docRef.id, ...newData };
+      setCommittees(prev => [...prev, newCommittee]);
+      if (!selectedCommittee) setSelectedCommittee(newCommittee);
       showToast('Committee created successfully!');
       setCommitteeForm({ name: '', description: '' });
-      fetchData();
     } catch (error) {
       console.error('Error creating committee:', error);
       showToast('Failed to create committee', 'error');
@@ -325,11 +380,11 @@ export default function AdminDashboard() {
             await updateDoc(doc(db, 'users', user.id), { committeeId: null });
           }
 
-          // Delete the committee
           await deleteDoc(doc(db, 'committees', committeeId));
-          showToast('Committee deleted successfully!');
+          setCommittees(prev => prev.filter(c => c.id !== committeeId));
+          setUsers(prev => prev.map(u => u.committeeId === committeeId ? { ...u, committeeId: null } : u));
           setSelectedCommittee(null);
-          fetchData();
+          showToast('Committee deleted successfully!');
         } catch (error) {
           console.error('Error deleting committee:', error);
           showToast('Failed to delete committee', 'error');
@@ -351,26 +406,24 @@ export default function AdminDashboard() {
       const userSnapshot = await getDocs(userQuery);
 
       if (!userSnapshot.empty) {
-        // User exists - update their committeeId
         const existingUser = userSnapshot.docs[0];
-        await updateDoc(doc(db, 'users', existingUser.id), {
-          committeeId: selectedCommittee.id
-        });
+        await updateDoc(doc(db, 'users', existingUser.id), { committeeId: selectedCommittee.id });
+        setUsers(prev => prev.map(u => u.id === existingUser.id ? { ...u, committeeId: selectedCommittee.id } : u));
         showToast(`${existingUser.data().firstName} ${existingUser.data().lastName} added to committee!`);
       } else {
-        // User doesn't exist - create new user
-        await addDoc(collection(db, 'users'), {
+        const newData = {
           ...memberForm,
           committeeId: selectedCommittee.id,
-          email: null, // Email is optional
+          email: null,
           isAdmin: false,
           createdAt: new Date().toISOString()
-        });
+        };
+        const docRef = await addDoc(collection(db, 'users'), newData);
+        setUsers(prev => [...prev, { id: docRef.id, ...newData }].sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)));
         showToast('New member added to committee!');
       }
 
       setMemberForm({ firstName: '', lastName: '', phone: '', alumniYear: '', village: '' });
-      fetchData();
     } catch (error) {
       console.error('Error adding member:', error);
       showToast('Failed to add member', 'error');
@@ -385,8 +438,8 @@ export default function AdminDashboard() {
       onConfirm: async () => {
         try {
           await updateDoc(doc(db, 'users', userId), { committeeId: null });
+          setUsers(prev => prev.map(u => u.id === userId ? { ...u, committeeId: null } : u));
           showToast('Member removed from committee!');
-          fetchData();
         } catch (error) {
           console.error('Error removing member:', error);
           showToast('Failed to remove member', 'error');
@@ -464,6 +517,110 @@ export default function AdminDashboard() {
         />
       )}
 
+      {/* Edit Donation Modal */}
+      {editDonation && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Edit Donation</h3>
+              <button onClick={() => setEditDonation(null)} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleEditDonation} className="p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Date</label>
+                  <input type="date" className="input-field" value={editDonation.date} onChange={(e) => setEditDonation({ ...editDonation, date: e.target.value })} required />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Donor Name</label>
+                  <input type="text" className="input-field" value={editDonation.donorName} onChange={(e) => setEditDonation({ ...editDonation, donorName: e.target.value })} required />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Amount (₹)</label>
+                  <input type="number" step="0.01" className="input-field" value={editDonation.amount} onChange={(e) => setEditDonation({ ...editDonation, amount: e.target.value })} required />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Phone</label>
+                  <input type="tel" className="input-field" value={editDonation.phone || ''} maxLength={10} onChange={(e) => setEditDonation({ ...editDonation, phone: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Passed Out Year</label>
+                  <input type="number" className="input-field" value={editDonation.alumniYear || ''} min="1950" max="2030" onChange={(e) => setEditDonation({ ...editDonation, alumniYear: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Village</label>
+                  <input type="text" className="input-field" value={editDonation.village || ''} onChange={(e) => setEditDonation({ ...editDonation, village: e.target.value })} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Notes</label>
+                <textarea className="input-field" rows="2" value={editDonation.notes || ''} onChange={(e) => setEditDonation({ ...editDonation, notes: e.target.value })} />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setEditDonation(null)} className="btn-secondary">Cancel</button>
+                <button type="submit" className="btn-primary">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Expense Modal */}
+      {editExpense && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Edit Expense</h3>
+              <button onClick={() => setEditExpense(null)} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleEditExpense} className="p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Date</label>
+                  <input type="date" className="input-field" value={editExpense.date} onChange={(e) => setEditExpense({ ...editExpense, date: e.target.value })} required />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Description</label>
+                  <input type="text" className="input-field" value={editExpense.description} onChange={(e) => setEditExpense({ ...editExpense, description: e.target.value })} required />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Amount (₹)</label>
+                  <input type="number" step="0.01" className="input-field" value={editExpense.amount} onChange={(e) => setEditExpense({ ...editExpense, amount: e.target.value })} required />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Category</label>
+                  <input type="text" className="input-field" value={editExpense.category || ''} onChange={(e) => setEditExpense({ ...editExpense, category: e.target.value })} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Notes</label>
+                <textarea className="input-field" rows="2" value={editExpense.notes || ''} onChange={(e) => setEditExpense({ ...editExpense, notes: e.target.value })} />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setEditExpense(null)} className="btn-secondary">Cancel</button>
+                <button type="submit" className="btn-primary">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Donation Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!deleteDonationTarget}
+        onClose={() => setDeleteDonationTarget(null)}
+        onConfirm={handleDeleteDonation}
+        title="Delete Donation"
+        message={deleteDonationTarget ? `Are you sure you want to delete the donation from ${deleteDonationTarget.donorName} — ₹${parseFloat(deleteDonationTarget.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}?` : ''}
+        confirmText="Yes, Delete"
+        cancelText="No, Close"
+        type="danger"
+      />
+
       {/* Confirmation Modal */}
       <ConfirmModal
         isOpen={confirmModal.isOpen}
@@ -503,7 +660,7 @@ export default function AdminDashboard() {
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  {tab}
+                  {tab === 'banking' ? 'Donate Now' : tab}
                 </button>
               ))}
             </nav>
@@ -755,6 +912,7 @@ export default function AdminDashboard() {
                         <th className="pb-3 text-xs sm:text-sm">Village</th>
                         <th className="pb-3 text-xs sm:text-sm">Notes</th>
                         <th className="pb-3 text-xs sm:text-sm">Recorded By</th>
+                        {currentAdmin?.isSuperAdmin && <th className="pb-3 text-xs sm:text-sm">Actions</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -769,7 +927,37 @@ export default function AdminDashboard() {
                           <td className="py-3 text-xs sm:text-sm">{donation.alumniYear || '-'}</td>
                           <td className="py-3 text-xs sm:text-sm">{donation.village || '-'}</td>
                           <td className="py-3 text-xs sm:text-sm">{donation.notes || '-'}</td>
-                          <td className="py-3 text-xs sm:text-sm text-gray-500">{donation.createdBy || '-'}</td>
+                          <td className="py-3 text-xs sm:text-sm text-gray-500">
+                            <span>{donation.createdBy || '-'}</span>
+                            {donation.modifiedBy && (
+                              <div className="text-xs text-amber-600 mt-0.5">
+                                <div>Modified by {donation.modifiedBy}</div>
+                                <div className="text-gray-400">
+                                  {new Date(donation.modifiedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                              </div>
+                            )}
+                          </td>
+                          {currentAdmin?.isSuperAdmin && (
+                            <td className="py-3">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => setEditDonation({ ...donation })}
+                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                  title="Edit"
+                                >
+                                  <Pencil size={14} />
+                                </button>
+                                <button
+                                  onClick={() => setDeleteDonationTarget(donation)}
+                                  className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  title="Delete"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          )}
                         </tr>
                       ))}
                     </tbody>
@@ -895,6 +1083,7 @@ export default function AdminDashboard() {
                         <th className="pb-3 text-xs sm:text-sm">Category</th>
                         <th className="pb-3 text-xs sm:text-sm">Notes</th>
                         <th className="pb-3 text-xs sm:text-sm">Recorded By</th>
+                        {currentAdmin?.isSuperAdmin && <th className="pb-3 text-xs sm:text-sm">Actions</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -907,7 +1096,28 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-3 text-xs sm:text-sm">{expense.category || '-'}</td>
                           <td className="py-3 text-xs sm:text-sm">{expense.notes || '-'}</td>
-                          <td className="py-3 text-xs sm:text-sm text-gray-500">{expense.createdBy || '-'}</td>
+                          <td className="py-3 text-xs sm:text-sm">
+                            <div className="text-gray-500">{expense.createdBy || '-'}</div>
+                            {expense.modifiedBy && (
+                              <div className="text-xs text-amber-600 mt-0.5">
+                                <div>Modified by {expense.modifiedBy}</div>
+                                <div className="text-gray-400">
+                                  {new Date(expense.modifiedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                              </div>
+                            )}
+                          </td>
+                          {currentAdmin?.isSuperAdmin && (
+                            <td className="py-3">
+                              <button
+                                onClick={() => setEditExpense({ ...expense })}
+                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="Edit"
+                              >
+                                <Pencil size={14} />
+                              </button>
+                            </td>
+                          )}
                         </tr>
                       ))}
                     </tbody>

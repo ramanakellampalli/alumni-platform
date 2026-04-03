@@ -179,7 +179,7 @@ export default function Login() {
           </div>
           <div className="animate-rise" style={{ animationDelay: '0.85s' }}>
             <p className="text-gray-400 mt-2">
-              Alumni Gathering &middot; 75th Anniversary
+              Platinum Jubilee Celebrations: Two days: May 9th and 10th
             </p>
           </div>
         </div>
@@ -226,7 +226,7 @@ export default function Login() {
               </div>
               <div className="animate-rise" style={{ animationDelay: '0.85s' }}>
                 <p className="text-gray-400 text-sm mt-1.5">
-                  Alumni Gathering &middot; 75th Anniversary
+                  Platinum Jubilee Celebrations: Two days: May 9th and 10th
                 </p>
               </div>
             </div>

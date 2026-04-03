@@ -1,4 +1,4 @@
-import { LogOut, User, Menu, X, Briefcase } from 'lucide-react';
+import { LogOut, User, Menu, X, Briefcase, Heart } from 'lucide-react';
 
 export default function Header({
   user,
@@ -7,7 +7,8 @@ export default function Header({
   onLogout,
   onNavigate,
   mobileMenuOpen,
-  setMobileMenuOpen
+  setMobileMenuOpen,
+  onDonateNow = null,
 }) {
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -66,6 +67,15 @@ export default function Header({
 
           {/* Right side - Desktop Menu */}
           <div className="hidden md:flex items-center gap-4">
+            {userType === 'user' && onDonateNow && (
+              <button
+                onClick={onDonateNow}
+                className="flex items-center gap-2 bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition-colors font-medium"
+              >
+                <Heart size={18} />
+                Donate Now
+              </button>
+            )}
             {userType === 'user' && user?.isAdmin && (
               <button
                 onClick={() => onNavigate('/admin')}
@@ -105,6 +115,18 @@ export default function Header({
         {/* Mobile Menu Dropdown */}
         {mobileMenuOpen && (
           <div className="md:hidden mt-4 py-2 border-t border-gray-200 space-y-2">
+            {userType === 'user' && onDonateNow && (
+              <button
+                onClick={() => {
+                  onDonateNow();
+                  setMobileMenuOpen(false);
+                }}
+                className="flex items-center gap-2 w-full px-4 py-2 text-left text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+              >
+                <Heart size={20} />
+                <span className="font-medium">Donate Now</span>
+              </button>
+            )}
             {userType === 'user' && user?.isAdmin && (
               <button
                 onClick={() => {

@@ -369,7 +369,17 @@ export default function Dashboard() {
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{donation.alumniYear || '-'}</td>
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{donation.village || '-'}</td>
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{donation.notes || '-'}</td>
-                        <td className="py-3 text-gray-500 text-xs sm:text-sm">{donation.createdBy || '-'}</td>
+                        <td className="py-3 text-xs sm:text-sm">
+                          <div className="text-gray-500">{donation.createdBy || '-'}</div>
+                          {donation.modifiedBy && (
+                            <div className="text-amber-600 text-xs mt-0.5">
+                              <div>Modified by {donation.modifiedBy}</div>
+                              <div className="text-gray-400">
+                                {new Date(donation.modifiedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            </div>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

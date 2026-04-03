@@ -868,6 +868,9 @@ export default function AdminDashboard() {
                             {donation.modifiedBy && (
                               <div className="text-xs text-amber-600 mt-0.5">
                                 Modified by {donation.modifiedBy}
+                                <span className="text-gray-400 ml-1">
+                                  {new Date(donation.modifiedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                </span>
                               </div>
                             )}
                           </td>

@@ -454,7 +454,17 @@ export default function Dashboard() {
                         </td>
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{expense.category || '-'}</td>
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{expense.notes || '-'}</td>
-                        <td className="py-3 text-gray-500 text-xs sm:text-sm">{expense.createdBy || '-'}</td>
+                        <td className="py-3 text-xs sm:text-sm">
+                          <div className="text-gray-500">{expense.createdBy || '-'}</div>
+                          {expense.modifiedBy && (
+                            <div className="text-amber-600 text-xs mt-0.5">
+                              <div>Modified by {expense.modifiedBy}</div>
+                              <div className="text-gray-400">
+                                {new Date(expense.modifiedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            </div>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

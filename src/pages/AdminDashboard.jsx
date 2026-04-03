@@ -88,6 +88,7 @@ export default function AdminDashboard() {
   const [showMeetingForm, setShowMeetingForm] = useState(false);
   const [editDonation, setEditDonation] = useState(null);
   const [deleteDonationTarget, setDeleteDonationTarget] = useState(null);
+  const [editExpense, setEditExpense] = useState(null);
   const [accommodationRequests, setAccommodationRequests] = useState([]);
 
   useEffect(() => {
@@ -218,6 +219,24 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error deleting donation:', error);
       showToast('Failed to delete donation', 'error');
+    }
+  };
+
+  const handleEditExpense = async (e) => {
+    e.preventDefault();
+    try {
+      const updated = {
+        ...editExpense,
+        modifiedBy: currentAdmin?.name || currentAdmin?.email || 'Unknown',
+        modifiedAt: new Date().toISOString()
+      };
+      await updateDoc(doc(db, 'expenses', editExpense.id), updated);
+      setExpenses(prev => prev.map(ex => ex.id === editExpense.id ? updated : ex));
+      showToast('Expense updated successfully!');
+      setEditExpense(null);
+    } catch (error) {
+      console.error('Error updating expense:', error);
+      showToast('Failed to update expense', 'error');
     }
   };
 
@@ -541,6 +560,48 @@ export default function AdminDashboard() {
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button type="button" onClick={() => setEditDonation(null)} className="btn-secondary">Cancel</button>
+                <button type="submit" className="btn-primary">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Expense Modal */}
+      {editExpense && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Edit Expense</h3>
+              <button onClick={() => setEditExpense(null)} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleEditExpense} className="p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Date</label>
+                  <input type="date" className="input-field" value={editExpense.date} onChange={(e) => setEditExpense({ ...editExpense, date: e.target.value })} required />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Description</label>
+                  <input type="text" className="input-field" value={editExpense.description} onChange={(e) => setEditExpense({ ...editExpense, description: e.target.value })} required />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Amount (₹)</label>
+                  <input type="number" step="0.01" className="input-field" value={editExpense.amount} onChange={(e) => setEditExpense({ ...editExpense, amount: e.target.value })} required />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Category</label>
+                  <input type="text" className="input-field" value={editExpense.category || ''} onChange={(e) => setEditExpense({ ...editExpense, category: e.target.value })} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Notes</label>
+                <textarea className="input-field" rows="2" value={editExpense.notes || ''} onChange={(e) => setEditExpense({ ...editExpense, notes: e.target.value })} />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setEditExpense(null)} className="btn-secondary">Cancel</button>
                 <button type="submit" className="btn-primary">Save Changes</button>
               </div>
             </form>
@@ -1022,6 +1083,7 @@ export default function AdminDashboard() {
                         <th className="pb-3 text-xs sm:text-sm">Category</th>
                         <th className="pb-3 text-xs sm:text-sm">Notes</th>
                         <th className="pb-3 text-xs sm:text-sm">Recorded By</th>
+                        {currentAdmin?.isSuperAdmin && <th className="pb-3 text-xs sm:text-sm">Actions</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -1034,7 +1096,28 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-3 text-xs sm:text-sm">{expense.category || '-'}</td>
                           <td className="py-3 text-xs sm:text-sm">{expense.notes || '-'}</td>
-                          <td className="py-3 text-xs sm:text-sm text-gray-500">{expense.createdBy || '-'}</td>
+                          <td className="py-3 text-xs sm:text-sm">
+                            <div className="text-gray-500">{expense.createdBy || '-'}</div>
+                            {expense.modifiedBy && (
+                              <div className="text-xs text-amber-600 mt-0.5">
+                                <div>Modified by {expense.modifiedBy}</div>
+                                <div className="text-gray-400">
+                                  {new Date(expense.modifiedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                              </div>
+                            )}
+                          </td>
+                          {currentAdmin?.isSuperAdmin && (
+                            <td className="py-3">
+                              <button
+                                onClick={() => setEditExpense({ ...expense })}
+                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="Edit"
+                              >
+                                <Pencil size={14} />
+                              </button>
+                            </td>
+                          )}
                         </tr>
                       ))}
                     </tbody>

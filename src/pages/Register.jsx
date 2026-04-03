@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../config/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import Toast from '../components/Toast';
 import Footer from '../components/Footer';
@@ -46,11 +46,35 @@ export default function Register() {
       const toTitleCase = str => str.trim().split(' ')
         .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 
+      const firstName = toTitleCase(formData.firstName);
+      const lastName = toTitleCase(formData.lastName);
+
+      // Check duplicate by phone
+      const phoneSnap = await getDocs(query(collection(db, 'users'), where('phone', '==', formData.phone)));
+      if (!phoneSnap.empty) {
+        setError('A user with this phone number is already registered.');
+        setLoading(false);
+        return;
+      }
+
+      // Check duplicate by name + alumni year
+      const nameSnap = await getDocs(query(
+        collection(db, 'users'),
+        where('firstName', '==', firstName),
+        where('lastName', '==', lastName),
+        where('alumniYear', '==', formData.alumniYear)
+      ));
+      if (!nameSnap.empty) {
+        setError('A user with the same name and alumni year is already registered.');
+        setLoading(false);
+        return;
+      }
+
       // Add user to Firestore
       await addDoc(collection(db, 'users'), {
         ...formData,
-        firstName: toTitleCase(formData.firstName),
-        lastName: toTitleCase(formData.lastName),
+        firstName,
+        lastName,
         isAdmin: false,
         createdAt: new Date().toISOString()
       });

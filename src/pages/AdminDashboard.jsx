@@ -128,7 +128,7 @@ export default function AdminDashboard() {
 
       // Fetch users
       const usersSnapshot = await getDocs(collection(db, 'users'));
-      setUsers(usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setUsers(usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)));
 
       // Fetch admins
       const adminsSnapshot = await getDocs(collection(db, 'admins'));
@@ -419,7 +419,7 @@ export default function AdminDashboard() {
           createdAt: new Date().toISOString()
         };
         const docRef = await addDoc(collection(db, 'users'), newData);
-        setUsers(prev => [...prev, { id: docRef.id, ...newData }]);
+        setUsers(prev => [...prev, { id: docRef.id, ...newData }].sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)));
         showToast('New member added to committee!');
       }
 

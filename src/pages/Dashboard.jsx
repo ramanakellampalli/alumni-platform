@@ -58,7 +58,7 @@ export default function Dashboard() {
 
       // Fetch users
       const usersSnapshot = await getDocs(collection(db, 'users'));
-      setUsers(usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setUsers(usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)));
 
       // Fetch committees
       const committeesSnapshot = await getDocs(collection(db, 'committees'));

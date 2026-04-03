@@ -156,17 +156,17 @@ export default function AdminDashboard() {
   const handleAddMeeting = async (e) => {
     e.preventDefault();
 
-    // Validate at least one committee is selected
     if (meetingForm.committeeIds.length === 0) {
       showToast('Please select at least one committee for this meeting', 'error');
       return;
     }
 
     try {
-      await addDoc(collection(db, 'meetings'), meetingForm);
+      const docRef = await addDoc(collection(db, 'meetings'), meetingForm);
+      const newMeeting = { id: docRef.id, ...meetingForm };
+      setMeetings(prev => [newMeeting, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)));
       showToast('Meeting added successfully!');
       setMeetingForm({ title: '', date: '', timeFrom: '', timeTo: '', description: '', zoomLink: '', committeeIds: [] });
-      fetchData();
     } catch (error) {
       console.error('Error adding meeting:', error);
       showToast('Failed to add meeting', 'error');
@@ -176,14 +176,15 @@ export default function AdminDashboard() {
   const handleAddDonation = async (e) => {
     e.preventDefault();
     try {
-      await addDoc(collection(db, 'donations'), {
+      const newData = {
         ...donationForm,
         createdBy: currentAdmin?.name || currentAdmin?.email || 'Unknown',
         createdAt: new Date().toISOString()
-      });
+      };
+      const docRef = await addDoc(collection(db, 'donations'), newData);
+      setDonations(prev => [{ id: docRef.id, ...newData }, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)));
       showToast('Donation recorded successfully!');
       setDonationForm({ date: '', donorName: '', amount: '', phone: '', alumniYear: '', village: '', notes: '' });
-      fetchData();
     } catch (error) {
       console.error('Error adding donation:', error);
       showToast('Failed to record donation', 'error');
@@ -223,14 +224,15 @@ export default function AdminDashboard() {
   const handleAddExpense = async (e) => {
     e.preventDefault();
     try {
-      await addDoc(collection(db, 'expenses'), {
+      const newData = {
         ...expenseForm,
         createdBy: currentAdmin?.name || currentAdmin?.email || 'Unknown',
         createdAt: new Date().toISOString()
-      });
+      };
+      const docRef = await addDoc(collection(db, 'expenses'), newData);
+      setExpenses(prev => [{ id: docRef.id, ...newData }, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)));
       showToast('Expense recorded successfully!');
       setExpenseForm({ date: '', description: '', amount: '', category: '', notes: '' });
-      fetchData();
     } catch (error) {
       console.error('Error adding expense:', error);
       showToast('Failed to record expense', 'error');
@@ -245,8 +247,8 @@ export default function AdminDashboard() {
       onConfirm: async () => {
         try {
           await deleteDoc(doc(db, 'meetings', meetingId));
+          setMeetings(prev => prev.filter(m => m.id !== meetingId));
           showToast('Meeting deleted successfully!');
-          fetchData();
         } catch (error) {
           console.error('Error deleting meeting:', error);
           showToast('Failed to delete meeting', 'error');
@@ -273,19 +275,18 @@ export default function AdminDashboard() {
 
       const uid = userCredential.user.uid;
 
-      // Add to admins collection
-      await setDoc(doc(db, 'admins', uid), {
+      const newAdmin = {
         email: adminForm.email,
         name: adminForm.name,
         isAdmin: true,
         isSuperAdmin: false,
         createdAt: new Date().toISOString(),
         createdBy: currentAdmin.uid
-      });
-
+      };
+      await setDoc(doc(db, 'admins', uid), newAdmin);
+      setAdmins(prev => [...prev, { id: uid, uid, ...newAdmin }]);
       showToast('Admin added successfully!');
       setAdminForm({ email: '', password: '', name: '' });
-      fetchData();
     } catch (error) {
       console.error('Error adding admin:', error);
       if (error.code === 'auth/email-already-in-use') {
@@ -316,8 +317,8 @@ export default function AdminDashboard() {
       onConfirm: async () => {
         try {
           await deleteDoc(doc(db, 'admins', adminId));
+          setAdmins(prev => prev.filter(a => a.id !== adminId));
           showToast('Admin removed successfully!');
-          fetchData();
         } catch (error) {
           console.error('Error removing admin:', error);
           showToast('Failed to remove admin', 'error');
@@ -330,14 +331,17 @@ export default function AdminDashboard() {
   const handleCreateCommittee = async (e) => {
     e.preventDefault();
     try {
-      await addDoc(collection(db, 'committees'), {
+      const newData = {
         ...committeeForm,
         createdAt: new Date().toISOString(),
         createdBy: currentAdmin.uid
-      });
+      };
+      const docRef = await addDoc(collection(db, 'committees'), newData);
+      const newCommittee = { id: docRef.id, ...newData };
+      setCommittees(prev => [...prev, newCommittee]);
+      if (!selectedCommittee) setSelectedCommittee(newCommittee);
       showToast('Committee created successfully!');
       setCommitteeForm({ name: '', description: '' });
-      fetchData();
     } catch (error) {
       console.error('Error creating committee:', error);
       showToast('Failed to create committee', 'error');
@@ -357,11 +361,11 @@ export default function AdminDashboard() {
             await updateDoc(doc(db, 'users', user.id), { committeeId: null });
           }
 
-          // Delete the committee
           await deleteDoc(doc(db, 'committees', committeeId));
-          showToast('Committee deleted successfully!');
+          setCommittees(prev => prev.filter(c => c.id !== committeeId));
+          setUsers(prev => prev.map(u => u.committeeId === committeeId ? { ...u, committeeId: null } : u));
           setSelectedCommittee(null);
-          fetchData();
+          showToast('Committee deleted successfully!');
         } catch (error) {
           console.error('Error deleting committee:', error);
           showToast('Failed to delete committee', 'error');
@@ -383,26 +387,24 @@ export default function AdminDashboard() {
       const userSnapshot = await getDocs(userQuery);
 
       if (!userSnapshot.empty) {
-        // User exists - update their committeeId
         const existingUser = userSnapshot.docs[0];
-        await updateDoc(doc(db, 'users', existingUser.id), {
-          committeeId: selectedCommittee.id
-        });
+        await updateDoc(doc(db, 'users', existingUser.id), { committeeId: selectedCommittee.id });
+        setUsers(prev => prev.map(u => u.id === existingUser.id ? { ...u, committeeId: selectedCommittee.id } : u));
         showToast(`${existingUser.data().firstName} ${existingUser.data().lastName} added to committee!`);
       } else {
-        // User doesn't exist - create new user
-        await addDoc(collection(db, 'users'), {
+        const newData = {
           ...memberForm,
           committeeId: selectedCommittee.id,
-          email: null, // Email is optional
+          email: null,
           isAdmin: false,
           createdAt: new Date().toISOString()
-        });
+        };
+        const docRef = await addDoc(collection(db, 'users'), newData);
+        setUsers(prev => [...prev, { id: docRef.id, ...newData }]);
         showToast('New member added to committee!');
       }
 
       setMemberForm({ firstName: '', lastName: '', phone: '', alumniYear: '', village: '' });
-      fetchData();
     } catch (error) {
       console.error('Error adding member:', error);
       showToast('Failed to add member', 'error');
@@ -417,8 +419,8 @@ export default function AdminDashboard() {
       onConfirm: async () => {
         try {
           await updateDoc(doc(db, 'users', userId), { committeeId: null });
+          setUsers(prev => prev.map(u => u.id === userId ? { ...u, committeeId: null } : u));
           showToast('Member removed from committee!');
-          fetchData();
         } catch (error) {
           console.error('Error removing member:', error);
           showToast('Failed to remove member', 'error');

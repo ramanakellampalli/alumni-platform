@@ -193,14 +193,15 @@ export default function AdminDashboard() {
   const handleEditDonation = async (e) => {
     e.preventDefault();
     try {
-      await updateDoc(doc(db, 'donations', editDonation.id), {
+      const updated = {
         ...editDonation,
         modifiedBy: currentAdmin?.name || currentAdmin?.email || 'Unknown',
         modifiedAt: new Date().toISOString()
-      });
+      };
+      await updateDoc(doc(db, 'donations', editDonation.id), updated);
+      setDonations(prev => prev.map(d => d.id === editDonation.id ? updated : d));
       showToast('Donation updated successfully!');
       setEditDonation(null);
-      fetchData();
     } catch (error) {
       console.error('Error updating donation:', error);
       showToast('Failed to update donation', 'error');
@@ -210,9 +211,9 @@ export default function AdminDashboard() {
   const handleDeleteDonation = async () => {
     try {
       await deleteDoc(doc(db, 'donations', deleteDonationTarget.id));
+      setDonations(prev => prev.filter(d => d.id !== deleteDonationTarget.id));
       showToast('Donation deleted.');
       setDeleteDonationTarget(null);
-      fetchData();
     } catch (error) {
       console.error('Error deleting donation:', error);
       showToast('Failed to delete donation', 'error');

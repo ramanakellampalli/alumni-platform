@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { db } from '../config/firebase';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { BedDouble, Clock, CheckCircle, XCircle, MapPin, Phone, FileText } from 'lucide-react';
+import Toast from './Toast';
 
 export default function AccommodationRequest({ currentUser, request, onRequestSubmitted }) {
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null);
 
   const handleRequest = async () => {
     setLoading(true);
@@ -25,15 +27,22 @@ export default function AccommodationRequest({ currentUser, request, onRequestSu
       };
       const docRef = await addDoc(collection(db, 'accommodation_requests'), newRequest);
       onRequestSubmitted({ id: docRef.id, ...newRequest });
+      setToast({ message: 'Accommodation request submitted!', type: 'success' });
     } catch (err) {
       console.error('Error submitting accommodation request:', err);
+      setToast({ message: 'Failed to submit request. Please try again.', type: 'error' });
+    } finally {
       setLoading(false);
     }
   };
 
+  const toastEl = toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />;
+
   // No request yet
   if (!request) {
     return (
+      <>
+      {toastEl}
       <div className="bg-white rounded-lg shadow-sm p-4 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
@@ -52,6 +61,7 @@ export default function AccommodationRequest({ currentUser, request, onRequestSu
           {loading ? 'Submitting...' : 'Request Accommodation'}
         </button>
       </div>
+      </>
     );
   }
 

@@ -5,6 +5,7 @@ import { db } from '../config/firebase';
 import { collection, getDocs, query, orderBy, where } from 'firebase/firestore';
 import { Calendar, IndianRupee, FileText, Video, User, Briefcase } from 'lucide-react';
 import Footer from '../components/Footer';
+import ConfirmModal from '../components/ConfirmModal';
 import Reports from '../components/Reports';
 import BankingDetails from '../components/BankingDetails';
 import Header from '../components/Header';
@@ -24,6 +25,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('meetings');
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const [accommodationRequest, setAccommodationRequest] = useState(null);
   
   // Pagination states
@@ -92,10 +94,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const handleLogout = () => setConfirmLogout(true);
 
   // Helper function to format date in Indian format (dd/mm/yyyy)
   const formatIndianDate = (dateString) => {
@@ -178,13 +177,26 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading...</div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+          <p className="text-sm text-gray-500">Loading your dashboard...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      <ConfirmModal
+        isOpen={confirmLogout}
+        onClose={() => setConfirmLogout(false)}
+        onConfirm={() => { logout(); navigate('/login'); }}
+        title="Logout"
+        message="Are you sure you want to log out?"
+        confirmText="Yes, Logout"
+        cancelText="Cancel"
+        type="warning"
+      />
       <Header
         user={currentUser}
         userType="user"
@@ -236,7 +248,10 @@ export default function Dashboard() {
                 {/* Upcoming Meetings */}
 
           {meetings.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No upcoming meetings scheduled</p>
+            <div className="text-center py-10">
+              <p className="text-gray-500 font-medium">No meetings scheduled yet</p>
+              <p className="text-gray-400 text-sm mt-1">Check back soon for upcoming events.</p>
+            </div>
           ) : (
             <div className="max-h-[600px] overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pr-2">
@@ -305,17 +320,10 @@ export default function Dashboard() {
                               {isPast ? 'Meeting Ended' : isActive ? 'Join Now (Live)' : 'Join Meeting'}
                             </a>
                           ) : (
-                            <div className="space-y-1">
-                              <button
-                                disabled
-                                className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium w-full bg-gray-200 text-gray-400 cursor-not-allowed"
-                                title="This meeting is restricted to specific committees"
-                              >
-                                <Video size={16} />
-                                Meeting Restricted
-                              </button>
-                              <p className="text-xs text-gray-500 text-center">
-                                This meeting is for {meetingCommittees.map(c => c.name).join(', ')} only
+                            <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-center">
+                              <p className="text-xs font-semibold text-amber-700">Members Only</p>
+                              <p className="text-xs text-amber-600 mt-0.5">
+                                Restricted to: {meetingCommittees.map(c => c.name).join(', ')}
                               </p>
                             </div>
                           )}
@@ -340,7 +348,10 @@ export default function Dashboard() {
                 </h2>
 
           {donations.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No donations recorded yet</p>
+            <div className="text-center py-10">
+              <p className="text-gray-500 font-medium">No donations recorded yet</p>
+              <p className="text-gray-400 text-sm mt-1">Donations will appear here once they are added.</p>
+            </div>
           ) : (
             <>
               <div className="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
@@ -427,7 +438,10 @@ export default function Dashboard() {
                 </h2>
 
           {expenses.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No expenses recorded yet</p>
+            <div className="text-center py-10">
+              <p className="text-gray-500 font-medium">No expenses recorded yet</p>
+              <p className="text-gray-400 text-sm mt-1">Expenses will appear here once they are added.</p>
+            </div>
           ) : (
             <>
               <div className="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">

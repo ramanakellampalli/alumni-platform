@@ -1,6 +1,7 @@
 import { Copy, CheckCheck } from 'lucide-react';
 import { useState } from 'react';
 import upiQr from '../assets/upi-qr.jpg';
+import Toast from './Toast';
 
 const BANK = {
   accountName: 'OLD STUDENTS ASSOCIATION ZPHS VALAPARLA',
@@ -11,11 +12,12 @@ const BANK = {
   upiId: '5975097701@myapgb',
 };
 
-function CopyField({ label, value }) {
+function CopyField({ label, value, onCopied }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
     navigator.clipboard.writeText(value);
     setCopied(true);
+    onCopied(label);
     setTimeout(() => setCopied(false), 2000);
   };
   return (
@@ -36,8 +38,15 @@ function CopyField({ label, value }) {
 }
 
 export default function BankingDetails() {
+  const [toast, setToast] = useState(null);
+
+  const handleCopied = (label) => {
+    setToast({ message: `${label} copied to clipboard!`, type: 'success' });
+  };
+
   return (
     <div className="max-w-2xl">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-stretch">
 
         {/* QR Code Card */}
@@ -51,12 +60,12 @@ export default function BankingDetails() {
         {/* Bank Details Card */}
         <div className="card">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4">Bank Account Details</p>
-          <CopyField label="Account Name" value={BANK.accountName} />
-          <CopyField label="Account Number" value={BANK.accountNumber} />
-          <CopyField label="IFSC Code" value={BANK.ifsc} />
-          <CopyField label="Bank & Branch" value={BANK.branch} />
-          <CopyField label="Account Type" value={BANK.accountType} />
-          <CopyField label="UPI ID" value={BANK.upiId} />
+          <CopyField label="Account Name" value={BANK.accountName} onCopied={handleCopied} />
+          <CopyField label="Account Number" value={BANK.accountNumber} onCopied={handleCopied} />
+          <CopyField label="IFSC Code" value={BANK.ifsc} onCopied={handleCopied} />
+          <CopyField label="Bank & Branch" value={BANK.branch} onCopied={handleCopied} />
+          <CopyField label="Account Type" value={BANK.accountType} onCopied={handleCopied} />
+          <CopyField label="UPI ID" value={BANK.upiId} onCopied={handleCopied} />
         </div>
       </div>
 

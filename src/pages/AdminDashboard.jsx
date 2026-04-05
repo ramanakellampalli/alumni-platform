@@ -4,6 +4,7 @@ import { auth, db } from '../config/firebase';
 import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc, updateDoc, where } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { Plus, Calendar, IndianRupee, FileText, Users, Trash2, User, Shield, UserPlus, Eye, EyeOff, Briefcase, UserMinus, Pencil, X } from 'lucide-react';
+import { loadSession, clearSession } from '../utils/session';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
 import Footer from '../components/Footer';
@@ -92,14 +93,11 @@ export default function AdminDashboard() {
   const [accommodationRequests, setAccommodationRequests] = useState([]);
 
   useEffect(() => {
-    // Check if admin is logged in via Firebase Auth
-    const adminData = localStorage.getItem('alumni_admin');
-    if (!adminData) {
+    const admin = loadSession('alumni_admin');
+    if (!admin) {
       navigate('/admin-login');
       return;
     }
-    
-    const admin = JSON.parse(adminData);
     setCurrentAdmin(admin);
     fetchData();
   }, [navigate]);
@@ -448,14 +446,21 @@ export default function AdminDashboard() {
     });
   };
 
-  const handleLogout = async () => {
-    try {
-      await auth.signOut();
-      localStorage.removeItem('alumni_admin');
-      navigate('/admin-login');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+  const handleLogout = () => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Logout',
+      message: 'Are you sure you want to log out?',
+      onConfirm: async () => {
+        try {
+          await auth.signOut();
+          clearSession('alumni_admin');
+          navigate('/admin-login');
+        } catch (error) {
+          console.error('Logout error:', error);
+        }
+      }
+    });
   };
 
   // Pagination helpers
@@ -498,7 +503,10 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading...</div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+          <p className="text-sm text-gray-500">Loading admin dashboard...</p>
+        </div>
       </div>
     );
   }
@@ -916,6 +924,12 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody>
+                      {donations.length === 0 && (
+                        <tr><td colSpan={currentAdmin?.isSuperAdmin ? 9 : 8} className="py-10 text-center">
+                          <p className="text-gray-500 font-medium">No donations recorded yet</p>
+                          <p className="text-gray-400 text-sm mt-1">Use the form above to record the first donation.</p>
+                        </td></tr>
+                      )}
                       {paginatedDonations.map((donation) => (
                         <tr key={donation.id} className="border-b border-gray-100">
                           <td className="py-3 text-xs sm:text-sm">{formatIndianDate(donation.date)}</td>
@@ -1087,6 +1101,12 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody>
+                      {expenses.length === 0 && (
+                        <tr><td colSpan={currentAdmin?.isSuperAdmin ? 7 : 6} className="py-10 text-center">
+                          <p className="text-gray-500 font-medium">No expenses recorded yet</p>
+                          <p className="text-gray-400 text-sm mt-1">Use the form above to record the first expense.</p>
+                        </td></tr>
+                      )}
                       {paginatedExpenses.map((expense) => (
                         <tr key={expense.id} className="border-b border-gray-100">
                           <td className="py-3 text-xs sm:text-sm">{formatIndianDate(expense.date)}</td>

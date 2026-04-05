@@ -4,6 +4,7 @@ import { auth, db } from '../config/firebase';
 import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc, updateDoc, where } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { Plus, Calendar, IndianRupee, FileText, Users, Trash2, User, Shield, UserPlus, Eye, EyeOff, Briefcase, UserMinus, Pencil, X } from 'lucide-react';
+import { loadSession, clearSession } from '../utils/session';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
 import Footer from '../components/Footer';
@@ -92,14 +93,11 @@ export default function AdminDashboard() {
   const [accommodationRequests, setAccommodationRequests] = useState([]);
 
   useEffect(() => {
-    // Check if admin is logged in via Firebase Auth
-    const adminData = localStorage.getItem('alumni_admin');
-    if (!adminData) {
+    const admin = loadSession('alumni_admin');
+    if (!admin) {
       navigate('/admin-login');
       return;
     }
-    
-    const admin = JSON.parse(adminData);
     setCurrentAdmin(admin);
     fetchData();
   }, [navigate]);
@@ -451,7 +449,7 @@ export default function AdminDashboard() {
   const handleLogout = async () => {
     try {
       await auth.signOut();
-      localStorage.removeItem('alumni_admin');
+      clearSession('alumni_admin');
       navigate('/admin-login');
     } catch (error) {
       console.error('Logout error:', error);

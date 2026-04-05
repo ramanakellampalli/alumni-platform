@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { saveSession, loadSession } from '../utils/session';
 import { LogIn, UserPlus } from 'lucide-react';
 import Footer from '../components/Footer';
 import EventCountdown from '../components/EventCountdown';
@@ -110,6 +111,11 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (loadSession('alumni_admin')) { navigate('/admin', { replace: true }); return; }
+    if (loadSession('alumni_user')) { navigate('/dashboard', { replace: true }); return; }
+  }, []);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -126,7 +132,7 @@ export default function Login() {
       const result = await login(formData.lastName, formData.phone);
 
       if (result.success) {
-        localStorage.setItem('alumni_user', JSON.stringify(result.user));
+        saveSession('alumni_user', result.user);
         setCurrentUser(result.user);
         navigate('/dashboard');
       } else {

@@ -1,13 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../config/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { LogIn, ArrowLeft, Shield, Eye, EyeOff } from 'lucide-react';
+import { saveSession, loadSession } from '../utils/session';
 import Footer from '../components/Footer';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (loadSession('alumni_admin')) { navigate('/admin', { replace: true }); return; }
+    if (loadSession('alumni_user')) { navigate('/dashboard', { replace: true }); return; }
+  }, []);
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -58,8 +65,7 @@ export default function AdminLogin() {
         ...adminDoc.data()
       };
 
-      // Store in localStorage
-      localStorage.setItem('alumni_admin', JSON.stringify(adminData));
+      saveSession('alumni_admin', adminData);
 
       // Navigate to admin dashboard
       navigate('/admin');

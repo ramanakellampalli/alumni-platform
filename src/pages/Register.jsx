@@ -23,8 +23,12 @@ export default function Register() {
     const { name, value } = e.target;
     if (name === 'phone') {
       const digits = value.replace(/\D/g, '');
-      if (digits.startsWith('0')) return;
+      if (digits.startsWith('0')) {
+        setError('Phone number cannot start with 0.');
+        return;
+      }
       if (digits.length > 10) return;
+      setError('');
       setFormData({ ...formData, phone: digits });
     } else {
       setFormData({ ...formData, [name]: value });
@@ -163,6 +167,11 @@ export default function Register() {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
+                onBlur={() => {
+                  if (formData.phone.length > 0 && formData.phone.length < 10) {
+                    setError('Phone number must be exactly 10 digits.');
+                  }
+                }}
                 className="input-field"
                 placeholder="9876543210"
                 maxLength={10}

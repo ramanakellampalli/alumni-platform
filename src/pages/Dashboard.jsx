@@ -5,6 +5,7 @@ import { db } from '../config/firebase';
 import { collection, getDocs, query, orderBy, where } from 'firebase/firestore';
 import { Calendar, IndianRupee, FileText, Video, User, Briefcase } from 'lucide-react';
 import Footer from '../components/Footer';
+import ConfirmModal from '../components/ConfirmModal';
 import Reports from '../components/Reports';
 import BankingDetails from '../components/BankingDetails';
 import Header from '../components/Header';
@@ -24,6 +25,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('meetings');
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const [accommodationRequest, setAccommodationRequest] = useState(null);
   
   // Pagination states
@@ -92,10 +94,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const handleLogout = () => setConfirmLogout(true);
 
   // Helper function to format date in Indian format (dd/mm/yyyy)
   const formatIndianDate = (dateString) => {
@@ -188,6 +187,16 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      <ConfirmModal
+        isOpen={confirmLogout}
+        onClose={() => setConfirmLogout(false)}
+        onConfirm={() => { logout(); navigate('/login'); }}
+        title="Logout"
+        message="Are you sure you want to log out?"
+        confirmText="Yes, Logout"
+        cancelText="Cancel"
+        type="warning"
+      />
       <Header
         user={currentUser}
         userType="user"

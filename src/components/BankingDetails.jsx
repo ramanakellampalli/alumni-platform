@@ -1,4 +1,4 @@
-import { Copy, CheckCheck } from 'lucide-react';
+import { Copy, CheckCheck, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import upiQr from '../assets/upi-qr.jpg';
 import Toast from './Toast';
@@ -69,9 +69,21 @@ export default function BankingDetails() {
         </div>
       </div>
 
-      <p className="text-xs text-gray-400 mt-6 text-center">
-        After transferring, please share your transaction reference with the treasurer.
-      </p>
+      <div className="mt-6 text-center">
+        <p className="text-xs text-gray-400 mb-3">
+          After transferring, please share your transaction reference with the treasurer.
+        </p>
+        <a
+          href="https://wa.me/919948038073"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm shadow-green-200"
+        >
+          <MessageCircle size={16} />
+          Share Screenshot on WhatsApp
+        </a>
+        <p className="text-xs text-green-600 font-medium mt-2">+91 99480 38073</p>
+      </div>
     </div>
   );
 }

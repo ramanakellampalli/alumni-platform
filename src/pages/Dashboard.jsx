@@ -212,7 +212,7 @@ export default function Dashboard() {
       <div className="md:hidden max-w-7xl w-full mx-auto px-4 sm:px-6 pt-3 mb-0">
         <button
           onClick={() => setActiveTab('banking')}
-          className="flex items-center justify-center gap-2 w-full bg-amber-500 text-white px-4 py-2.5 rounded-lg hover:bg-amber-600 transition-colors font-medium mb-4"
+          className="flex items-center justify-center gap-2 w-full bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition-colors font-medium mb-4"
         >
           <Heart size={18} />
           Donate Now

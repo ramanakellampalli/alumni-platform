@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { db } from '../config/firebase';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
-import { BedDouble, Clock, CheckCircle, XCircle, MapPin, Phone, FileText } from 'lucide-react';
+import { BedDouble, Clock, CheckCircle, XCircle, MapPin, Phone, FileText, ChevronDown } from 'lucide-react';
 import Toast from './Toast';
 
 export default function AccommodationRequest({ currentUser, request, onRequestSubmitted }) {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
+  const [expanded, setExpanded] = useState(false);
 
   const handleRequest = async () => {
     setLoading(true);
@@ -80,40 +81,63 @@ export default function AccommodationRequest({ currentUser, request, onRequestSu
 
   // Approved
   if (request.status === 'approved') {
+    const details = (
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+        {request.location && (
+          <div className="flex items-start gap-2">
+            <MapPin size={14} className="text-gray-400 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wide">Location</p>
+              <p className="text-sm font-medium text-gray-900">{request.location}</p>
+            </div>
+          </div>
+        )}
+        {request.contactNumber && (
+          <div className="flex items-start gap-2">
+            <Phone size={14} className="text-gray-400 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wide">Contact</p>
+              <p className="text-sm font-medium text-gray-900">{request.contactNumber}</p>
+            </div>
+          </div>
+        )}
+        {request.notes && (
+          <div className="flex items-start gap-2">
+            <FileText size={14} className="text-gray-400 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wide">Notes</p>
+              <p className="text-sm font-medium text-gray-900">{request.notes}</p>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+
     return (
-      <div className="bg-white border border-green-200 rounded-lg p-4 mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <CheckCircle size={18} className="text-green-600" />
-          <p className="font-semibold text-green-800 text-sm">Accommodation Confirmed</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {request.location && (
-            <div className="flex items-start gap-2">
-              <MapPin size={14} className="text-gray-400 mt-0.5 shrink-0" />
-              <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Location</p>
-                <p className="text-sm font-medium text-gray-900">{request.location}</p>
-              </div>
-            </div>
-          )}
-          {request.contactNumber && (
-            <div className="flex items-start gap-2">
-              <Phone size={14} className="text-gray-400 mt-0.5 shrink-0" />
-              <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Contact</p>
-                <p className="text-sm font-medium text-gray-900">{request.contactNumber}</p>
-              </div>
-            </div>
-          )}
-          {request.notes && (
-            <div className="flex items-start gap-2">
-              <FileText size={14} className="text-gray-400 mt-0.5 shrink-0" />
-              <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Notes</p>
-                <p className="text-sm font-medium text-gray-900">{request.notes}</p>
-              </div>
-            </div>
-          )}
+      <div className="bg-white border border-green-200 rounded-lg mb-6 overflow-hidden">
+        {/* Mobile: accordion header */}
+        <button
+          onClick={() => setExpanded(v => !v)}
+          className="sm:hidden w-full flex items-center justify-between p-4"
+        >
+          <div className="flex items-center gap-2">
+            <CheckCircle size={18} className="text-green-600" />
+            <p className="font-semibold text-green-800 text-sm">Accommodation Confirmed</p>
+          </div>
+          <ChevronDown
+            size={16}
+            className={`text-gray-400 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+          />
+        </button>
+        {expanded && <div className="sm:hidden px-4 pb-4">{details}</div>}
+
+        {/* Desktop: always expanded */}
+        <div className="hidden sm:block p-4">
+          <div className="flex items-center gap-2">
+            <CheckCircle size={18} className="text-green-600" />
+            <p className="font-semibold text-green-800 text-sm">Accommodation Confirmed</p>
+          </div>
+          {details}
         </div>
       </div>
     );

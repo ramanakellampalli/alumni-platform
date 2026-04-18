@@ -115,18 +115,6 @@ export default function Header({
         {/* Mobile Menu Dropdown */}
         {mobileMenuOpen && (
           <div className="md:hidden mt-4 py-2 border-t border-gray-200 space-y-2">
-            {userType === 'user' && onDonateNow && (
-              <button
-                onClick={() => {
-                  onDonateNow();
-                  setMobileMenuOpen(false);
-                }}
-                className="flex items-center gap-2 w-full px-4 py-2 text-left text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-              >
-                <Heart size={20} />
-                <span className="font-medium">Donate Now</span>
-              </button>
-            )}
             {userType === 'user' && user?.isAdmin && (
               <button
                 onClick={() => {

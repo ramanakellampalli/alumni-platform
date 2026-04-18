@@ -209,7 +209,7 @@ export default function Dashboard() {
       />
 
       {/* Mobile-only Donate Now button */}
-      <div className="md:hidden max-w-7xl w-full mx-auto px-4 sm:px-6 pt-4 mb-0">
+      <div className="md:hidden max-w-7xl w-full mx-auto px-4 sm:px-6 pt-3 mb-0">
         <button
           onClick={() => setActiveTab('banking')}
           className="flex items-center justify-center gap-2 w-full bg-amber-500 text-white px-4 py-2.5 rounded-lg hover:bg-amber-600 transition-colors font-medium mb-4"
@@ -219,7 +219,7 @@ export default function Dashboard() {
         </button>
       </div>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-8 md:py-8">
         <AccommodationRequest
           currentUser={currentUser}
           request={accommodationRequest}

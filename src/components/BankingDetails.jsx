@@ -70,7 +70,7 @@ export default function BankingDetails() {
       </div>
 
       <p className="text-xs text-gray-400 mt-6 text-center">
-        After transferring, please share your transaction reference with the treasurer. Share a screenshot on WhatsApp to{' '}
+        After transferring, please share a screenshot of your transaction on WhatsApp to{' '}
         <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 font-semibold px-1.5 py-0.5 rounded">
           <MessageCircle size={12} />
           +91 99480 38073

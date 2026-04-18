@@ -69,18 +69,13 @@ export default function BankingDetails() {
         </div>
       </div>
 
-      <div className="mt-6 text-center">
-        <p className="text-xs text-gray-400">
-          After transferring, please share your transaction reference with the treasurer.
-        </p>
-        <p className="text-xs text-gray-400 mt-1">
-          Share a screenshot on WhatsApp to{' '}
-          <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 font-semibold px-1.5 py-0.5 rounded">
-            <MessageCircle size={12} />
-            +91 99480 38073
-          </span>
-        </p>
-      </div>
+      <p className="text-xs text-gray-400 mt-6 text-center">
+        After transferring, please share your transaction reference with the treasurer. Share a screenshot on WhatsApp to{' '}
+        <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 font-semibold px-1.5 py-0.5 rounded">
+          <MessageCircle size={12} />
+          +91 99480 38073
+        </span>
+      </p>
     </div>
   );
 }

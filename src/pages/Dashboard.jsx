@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../config/firebase';
@@ -26,6 +26,7 @@ export default function Dashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('meetings');
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const tabsRef = useRef(null);
   const [accommodationRequest, setAccommodationRequest] = useState(null);
   
   // Pagination states
@@ -95,6 +96,13 @@ export default function Dashboard() {
   };
 
   const handleLogout = () => setConfirmLogout(true);
+
+  const handleDonateNow = () => {
+    setActiveTab('banking');
+    setTimeout(() => {
+      tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
 
   // Helper function to format date in Indian format (dd/mm/yyyy)
   const formatIndianDate = (dateString) => {
@@ -205,13 +213,13 @@ export default function Dashboard() {
         onNavigate={navigate}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
-        onDonateNow={() => setActiveTab('banking')}
+        onDonateNow={handleDonateNow}
       />
 
       {/* Mobile-only Donate Now button */}
       <div className="md:hidden max-w-7xl w-full mx-auto px-4 sm:px-6 pt-3 mb-0">
         <button
-          onClick={() => setActiveTab('banking')}
+          onClick={handleDonateNow}
           className="flex items-center justify-center gap-2 w-full bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition-colors font-medium mb-4"
         >
           <Heart size={18} />
@@ -233,7 +241,7 @@ export default function Dashboard() {
         />
 
         {/* Tabs */}
-        <div className="bg-white rounded-lg shadow-sm mb-6">
+        <div ref={tabsRef} className="bg-white rounded-lg shadow-sm mb-6">
           <div className="border-b border-gray-200 overflow-x-auto">
             <nav className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 min-w-max" aria-label="Tabs">
               {['meetings', 'donations', 'expenses', 'committee', 'reports', 'banking'].map((tab) => (

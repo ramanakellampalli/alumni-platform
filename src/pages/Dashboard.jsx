@@ -35,6 +35,11 @@ export default function Dashboard() {
   const itemsPerPage = 5;
 
   useEffect(() => {
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
+
+  useEffect(() => {
     if (!currentUser) {
       navigate('/login');
       return;

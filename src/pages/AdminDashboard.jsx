@@ -33,6 +33,7 @@ export default function AdminDashboard() {
   const [donationPage, setDonationPage] = useState(1);
   const [expensePage, setExpensePage] = useState(1);
   const [userPage, setUserPage] = useState(1);
+  const [yearSort, setYearSort] = useState(null); // null | 'asc' | 'desc'
   const itemsPerPage = 10;
 
   // Toast state
@@ -474,12 +475,19 @@ export default function AdminDashboard() {
     return Math.ceil(data.length / itemsPerPage);
   };
 
+  const sortedUsers = yearSort
+    ? [...users].sort((a, b) => {
+        const diff = (parseInt(a.alumniYear) || 0) - (parseInt(b.alumniYear) || 0);
+        return yearSort === 'asc' ? diff : -diff;
+      })
+    : users;
+
   const paginatedDonations = getPaginatedData(donations, donationPage);
   const paginatedExpenses = getPaginatedData(expenses, expensePage);
-  const paginatedUsers = getPaginatedData(users, userPage);
+  const paginatedUsers = getPaginatedData(sortedUsers, userPage);
   const totalDonationPages = getTotalPages(donations);
   const totalExpensePages = getTotalPages(expenses);
-  const totalUserPages = getTotalPages(users);
+  const totalUserPages = getTotalPages(sortedUsers);
 
   // Helper function to format date in Indian format (dd/mm/yyyy)
   const formatIndianDate = (dateString) => {
@@ -1185,7 +1193,20 @@ export default function AdminDashboard() {
                         <th className="pb-3 text-xs sm:text-sm">Name</th>
                         <th className="pb-3 text-xs sm:text-sm">Phone</th>
                         <th className="pb-3 text-xs sm:text-sm">Village</th>
-                        <th className="pb-3 text-xs sm:text-sm">Year</th>
+                        <th className="pb-3 text-xs sm:text-sm">
+                          <button
+                            onClick={() => {
+                              setYearSort(prev => prev === 'asc' ? 'desc' : prev === 'desc' ? null : 'asc');
+                              setUserPage(1);
+                            }}
+                            className="flex items-center gap-1 hover:text-primary-600 transition-colors group"
+                          >
+                            Year
+                            <span className="text-gray-400 group-hover:text-primary-500">
+                              {yearSort === 'asc' ? '↑' : yearSort === 'desc' ? '↓' : '↕'}
+                            </span>
+                          </button>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>

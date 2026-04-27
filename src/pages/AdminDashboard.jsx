@@ -976,7 +976,7 @@ export default function AdminDashboard() {
                         <th className="pb-3 text-xs sm:text-sm">Phone</th>
                         <th className="pb-3 text-xs sm:text-sm">Year</th>
                         <th className="pb-3 text-xs sm:text-sm">Village</th>
-                        <th className="pb-3 text-xs sm:text-sm">Notes</th>
+                        <th className="pb-3 text-xs sm:text-sm hidden sm:table-cell">Notes</th>
                         <th className="pb-3 text-xs sm:text-sm">Recorded By</th>
                         {currentAdmin?.isSuperAdmin && <th className="pb-3 text-xs sm:text-sm">Actions</th>}
                       </tr>
@@ -998,7 +998,7 @@ export default function AdminDashboard() {
                           <td className="py-3 text-xs sm:text-sm">{donation.phone || '-'}</td>
                           <td className="py-3 text-xs sm:text-sm">{donation.alumniYear || '-'}</td>
                           <td className="py-3 text-xs sm:text-sm">{donation.village || '-'}</td>
-                          <td className="py-3 text-xs sm:text-sm">{donation.notes || '-'}</td>
+                          <td className="py-3 text-xs sm:text-sm hidden sm:table-cell">{donation.notes || '-'}</td>
                           <td className="py-3 text-xs sm:text-sm text-gray-500">
                             <span>{donation.createdBy || '-'}</span>
                             {donation.modifiedBy && (

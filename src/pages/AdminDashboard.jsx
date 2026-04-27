@@ -971,7 +971,7 @@ export default function AdminDashboard() {
                     <thead className="border-b border-gray-200">
                       <tr className="text-left">
                         <th className="pb-3 text-xs sm:text-sm">Date</th>
-                        <th className="pb-3 text-xs sm:text-sm w-[140px]">Donor</th>
+                        <th className="pb-3 text-xs sm:text-sm w-[180px]">Donor</th>
                         <th className="pb-3 text-xs sm:text-sm">Amount</th>
                         <th className="pb-3 text-xs sm:text-sm">Phone</th>
                         <th className="pb-3 text-xs sm:text-sm">Year</th>
@@ -991,7 +991,7 @@ export default function AdminDashboard() {
                       {paginatedDonations.map((donation) => (
                         <tr key={donation.id} className="border-b border-gray-100">
                           <td className="py-3 text-xs sm:text-sm">{formatIndianDate(donation.date)}</td>
-                          <td className="py-3 text-xs sm:text-sm w-[140px] break-words">{donation.donorName}</td>
+                          <td className="py-3 text-xs sm:text-sm w-[180px] break-words">{donation.donorName}</td>
                           <td className="py-3 font-semibold text-green-600 text-xs sm:text-sm whitespace-nowrap">
                             ₹{parseFloat(donation.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </td>

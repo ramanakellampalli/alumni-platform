@@ -531,6 +531,9 @@ export default function AdminDashboard() {
   const totalUserPages = getTotalPages(sortedUsers);
 
   // Helper function to format date in Indian format (dd/mm/yyyy)
+  const modifiedByLabel = (createdBy, modifiedBy) =>
+    modifiedBy === createdBy ? modifiedBy.split(' ')[0] : modifiedBy;
+
   const formatIndianDate = (dateString) => {
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, '0');
@@ -1003,7 +1006,7 @@ export default function AdminDashboard() {
                             <span>{donation.createdBy || '-'}</span>
                             {donation.modifiedBy && (
                               <div className="text-xs text-amber-600 mt-0.5">
-                                <div>Modified by {donation.modifiedBy}</div>
+                                <div>Modified by {modifiedByLabel(donation.createdBy, donation.modifiedBy)}</div>
                                 <div className="text-gray-400">
                                   {new Date(donation.modifiedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                 </div>
@@ -1187,7 +1190,7 @@ export default function AdminDashboard() {
                             <div className="text-gray-500">{expense.createdBy || '-'}</div>
                             {expense.modifiedBy && (
                               <div className="text-xs text-amber-600 mt-0.5">
-                                <div>Modified by {expense.modifiedBy}</div>
+                                <div>Modified by {modifiedByLabel(expense.createdBy, expense.modifiedBy)}</div>
                                 <div className="text-gray-400">
                                   {new Date(expense.modifiedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                 </div>

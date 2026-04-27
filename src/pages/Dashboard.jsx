@@ -383,12 +383,12 @@ export default function Dashboard() {
                   <thead className="border-b border-gray-200">
                     <tr className="text-left">
                       <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Date</th>
-                      <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Donor</th>
+                      <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm w-[180px]">Donor</th>
                       <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Amount</th>
                       <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Phone</th>
                       <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Year</th>
                       <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Village</th>
-                      <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Notes</th>
+                      <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm hidden sm:table-cell">Notes</th>
                       <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Recorded By</th>
                     </tr>
                   </thead>
@@ -396,14 +396,14 @@ export default function Dashboard() {
                     {paginatedDonations.map((donation) => (
                       <tr key={donation.id} className="border-b border-gray-100">
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{formatIndianDate(donation.date)}</td>
-                        <td className="py-3 text-xs sm:text-sm">{donation.donorName}</td>
+                        <td className="py-3 text-xs sm:text-sm w-[180px] break-words">{donation.donorName}</td>
                         <td className="py-3 font-semibold text-green-600 text-xs sm:text-sm whitespace-nowrap">
                           ₹{parseFloat(donation.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{donation.phone || '-'}</td>
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{donation.alumniYear || '-'}</td>
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{donation.village || '-'}</td>
-                        <td className="py-3 text-gray-600 text-xs sm:text-sm">{donation.notes || '-'}</td>
+                        <td className="py-3 text-gray-600 text-xs sm:text-sm hidden sm:table-cell">{donation.notes || '-'}</td>
                         <td className="py-3 text-xs sm:text-sm">
                           <div className="text-gray-500">{donation.createdBy || '-'}</div>
                           {donation.modifiedBy && (
@@ -476,7 +476,7 @@ export default function Dashboard() {
                       <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Description</th>
                       <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Amount</th>
                       <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Category</th>
-                      <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Notes</th>
+                      <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm hidden sm:table-cell">Notes</th>
                       <th className="pb-3 font-semibold text-gray-700 text-xs sm:text-sm">Recorded By</th>
                     </tr>
                   </thead>
@@ -491,7 +491,7 @@ export default function Dashboard() {
                           ₹{parseFloat(expense.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
                         <td className="py-3 text-gray-600 text-xs sm:text-sm">{expense.category || '-'}</td>
-                        <td className="py-3 text-gray-600 text-xs sm:text-sm">{expense.notes || '-'}</td>
+                        <td className="py-3 text-gray-600 text-xs sm:text-sm hidden sm:table-cell">{expense.notes || '-'}</td>
                         <td className="py-3 text-xs sm:text-sm">
                           <div className="text-gray-500">{expense.createdBy || '-'}</div>
                           {expense.modifiedBy && (

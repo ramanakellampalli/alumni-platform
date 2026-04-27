@@ -413,7 +413,7 @@ export default function Dashboard() {
                             <div className="text-amber-600 text-xs mt-0.5">
                               <div>Modified by {modifiedByLabel(donation.createdBy, donation.modifiedBy)}</div>
                               <div className="text-gray-400">
-                                {new Date(donation.modifiedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                {new Date(donation.modifiedAt).toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })}
                               </div>
                             </div>
                           )}
@@ -501,7 +501,7 @@ export default function Dashboard() {
                             <div className="text-amber-600 text-xs mt-0.5">
                               <div>Modified by {modifiedByLabel(expense.createdBy, expense.modifiedBy)}</div>
                               <div className="text-gray-400">
-                                {new Date(expense.modifiedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                {new Date(expense.modifiedAt).toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })}
                               </div>
                             </div>
                           )}

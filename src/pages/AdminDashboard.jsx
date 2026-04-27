@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../config/firebase';
 import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc, updateDoc, where } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { Plus, Calendar, IndianRupee, FileText, Users, Trash2, User, Shield, UserPlus, Eye, EyeOff, Briefcase, UserMinus, Pencil, X } from 'lucide-react';
+import { Plus, Users, Trash2, UserPlus, Eye, EyeOff, UserMinus, Pencil, X, Download } from 'lucide-react';
 import { loadSession, clearSession } from '../utils/session';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
@@ -446,6 +446,47 @@ export default function AdminDashboard() {
       }
     });
   };
+
+  const exportToCSV = (rows, columns, filename) => {
+    const header = columns.map(c => c.label).join(',');
+    const body = rows.map(row =>
+      columns.map(c => {
+        const val = c.value(row) ?? '';
+        return `"${String(val).replace(/"/g, '""')}"`;
+      }).join(',')
+    ).join('\n');
+    const blob = new Blob([`${header}\n${body}`], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportDonations = () => exportToCSV(donations, [
+    { label: 'Date', value: r => r.date },
+    { label: 'Donor Name', value: r => r.donorName },
+    { label: 'Amount', value: r => r.amount },
+    { label: 'Phone', value: r => r.phone },
+    { label: 'Alumni Year', value: r => r.alumniYear },
+    { label: 'Village', value: r => r.village },
+    { label: 'Notes', value: r => r.notes },
+    { label: 'Recorded By', value: r => r.createdBy },
+    { label: 'Modified By', value: r => r.modifiedBy },
+    { label: 'Modified At', value: r => r.modifiedAt },
+  ], `donations_${new Date().toISOString().split('T')[0]}.csv`);
+
+  const exportExpenses = () => exportToCSV(expenses, [
+    { label: 'Date', value: r => r.date },
+    { label: 'Description', value: r => r.description },
+    { label: 'Amount', value: r => r.amount },
+    { label: 'Category', value: r => r.category },
+    { label: 'Notes', value: r => r.notes },
+    { label: 'Recorded By', value: r => r.createdBy },
+    { label: 'Modified By', value: r => r.modifiedBy },
+    { label: 'Modified At', value: r => r.modifiedAt },
+  ], `expenses_${new Date().toISOString().split('T')[0]}.csv`);
 
   const handleLogout = () => {
     setConfirmModal({
@@ -915,7 +956,16 @@ export default function AdminDashboard() {
                   )}
                 </div>
 
-                <h3 className="text-lg font-semibold mb-4">All Donations (₹{totalDonations.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">All Donations (₹{totalDonations.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</h3>
+                  <button
+                    onClick={exportDonations}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg transition-colors"
+                  >
+                    <Download size={14} />
+                    Export
+                  </button>
+                </div>
                 <div className="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
                   <table className="w-full min-w-[800px]">
                     <thead className="border-b border-gray-200">
@@ -1094,7 +1144,16 @@ export default function AdminDashboard() {
                   )}
                 </div>
 
-                <h3 className="text-lg font-semibold mb-4">All Expenses (₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">All Expenses (₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</h3>
+                  <button
+                    onClick={exportExpenses}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-orange-700 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg transition-colors"
+                  >
+                    <Download size={14} />
+                    Export
+                  </button>
+                </div>
                 <div className="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
                   <table className="w-full min-w-[700px]">
                     <thead className="border-b border-gray-200">
